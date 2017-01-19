@@ -28,7 +28,7 @@ class Trace_Generator:
         self.n_signal_photon = n_signal_photon  # number of Cherenkov photons
         self.sig_poisson = sig_poisson # is the number of signal photons distributed as a poisson?
 
-        self.filename_pulse_shape = 'pulse_SST-1M_AfterPreampLowGain.dat'  # pulse shape template file
+        self.filename_pulse_shape = 'utils/pulse_SST-1M_AfterPreampLowGain.dat'  # pulse shape template file
         self.pe_to_adc = 5.6
         self.sigma_1 = 0.8921 / 9.6  # spread due to charge resolution in photocounting
         self.sigma_e = 0.7769 / 9.6  # electronic spread in analog to digital conversion
