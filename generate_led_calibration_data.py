@@ -1,4 +1,4 @@
-from trace_generator import Trace_Generator
+from tracegenerator import TraceGenerator
 import numpy as np
 import matplotlib.pyplot as plt
 from utils.progress_bar import print_progress_bar
@@ -12,7 +12,7 @@ def generate_mpe_spectrum(start_time=-50, end_time=50., sampling_time=4., nsb_ra
 
     while i<n_trace:
 
-        trace_object = Trace_Generator(start_time=start_time, end_time=end_time, sampling_time=sampling_time, nsb_rate=nsb_rate, mean_crosstalk_production=mean_crosstalk_production, n_signal_photon=n_signal_photon, sig_poisson=sig_poisson)
+        trace_object = TraceGenerator(start_time=start_time, end_time=end_time, sampling_time=sampling_time, nsb_rate=nsb_rate, mean_crosstalk_production=mean_crosstalk_production, n_signal_photon=n_signal_photon, sig_poisson=sig_poisson)
         adcs = trace_object.get_adc_count()
 
 

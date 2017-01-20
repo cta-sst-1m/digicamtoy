@@ -8,7 +8,7 @@ import numpy as np
 import scipy.interpolate
 
 
-class Trace_Generator:
+class TraceGenerator:
     def __init__(self, start_time=0., end_time=1000., sampling_time=4., nsb_rate=660 * 1E6 * 1E-9,
                  mean_crosstalk_production=0.08, debug=False, gain_nsb_dependency=False, n_signal_photon=0.,sig_poisson= True):
 
@@ -48,17 +48,6 @@ class Trace_Generator:
         self.photon_arrival_time = np.zeros(1)
         self.photon = np.zeros(1)
 
-        ## Compute the FADC signal
-
-        if (self.n_signal_photon > 0):
-            self.add_signal_photon()
-
-        self.generate_nsb()
-        self.generate_crosstalk()
-        self.generate_photon_smearing()
-        self.compute_analog_signal()
-        self.convert_to_digital()
-
         ## Ploting results
 
         if (debug):
@@ -79,6 +68,35 @@ class Trace_Generator:
             plt.ylabel(r'count')
 
             plt.show()
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+         return self.next()
+
+    def fast_config(self,n_signal,nsb_rate):
+        self.nsb_rate = nsb_rate
+        self.n_signal_photon = n_signal
+
+    def next(self):
+        self.photon_arrival_time = np.zeros(1)
+        self.photon = np.zeros(1)
+        self.sampling_bins = np.arange(self.start_time, self.end_time + self.sampling_time,
+                                       self.sampling_time)  # FADC sampling times
+        self.adc_count = np.zeros(len(self.sampling_bins))  # FADC values
+
+        ## Compute the FADC signal
+        if (self.n_signal_photon > 0 ):
+            self.add_signal_photon()
+
+        self.generate_nsb()
+        self.generate_crosstalk()
+        self.generate_photon_smearing()
+        self.compute_analog_signal()
+        self.convert_to_digital()
+        #return self.n_signal_photon,self.nsb_rate,self.adc_count
+
 
     def get_adc_count(self):
 
@@ -349,8 +367,8 @@ if __name__ == '__main__':
 
     for i in range(int(N_forced_trigger)):
         adc_count.append(
-            Trace_Generator(start_time, end_time, sampling_time, nsb_rate, mean_crosstalk_production, debug, False,
-                            n_cherenkov_photon).adc_count)
+            TraceGenerator(start_time, end_time, sampling_time, nsb_rate, mean_crosstalk_production, debug, False,
+                           n_cherenkov_photon).adc_count)
 
     adc_count = np.asarray(adc_count)
     print(adc_count.shape)
