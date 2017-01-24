@@ -10,7 +10,7 @@ import scipy.interpolate
 
 class Trace_Generator:
     def __init__(self, start_time=0., end_time=1000., sampling_time=4., nsb_rate=660 * 1E6 * 1E-9,
-                 mean_crosstalk_production=0.08, debug=False, gain_nsb_dependency=False, n_signal_photon=0.,sig_poisson= True):
+                 mean_crosstalk_production=0.08, debug=False, gain_nsb_dependency=False, n_signal_photon=0.,sig_poisson= True, sigma_e=0.080927083, sigma_1=0.092927083, gain=5.6):
 
         ## Initialize class attributs
 
@@ -29,9 +29,9 @@ class Trace_Generator:
         self.sig_poisson = sig_poisson # is the number of signal photons distributed as a poisson?
 
         self.filename_pulse_shape = 'utils/pulse_SST-1M_AfterPreampLowGain.dat'  # pulse shape template file
-        self.pe_to_adc = 5.6
-        self.sigma_1 = 0.8921 / 9.6  # spread due to charge resolution in photocounting
-        self.sigma_e = 0.7769 / 9.6  # electronic spread in analog to digital conversion
+        self.pe_to_adc = gain
+        self.sigma_1 = sigma_1  # spread due to charge resolution in photocounting
+        self.sigma_e = sigma_e  # electronic spread in analog to digital conversion
         self.baseline_shift = 10
         self.cell_capacitance = 85. * 1E-15  # Farad
         self.bias_resistance = 10. * 1E3  # Ohm
@@ -86,7 +86,7 @@ class Trace_Generator:
 
     def add_signal_photon(self):
 
-        self.photon_arrival_time[0] = 0 + np.random.uniform(0, self.sampling_time, size=1)
+        self.photon_arrival_time[0] = 0 + np.random.uniform(0, 0 + self.sampling_time, size=1)
         self.cherenkov_time = self.photon_arrival_time[0]
         self.photon[0] = np.random.poisson(self.n_signal_photon) if self.sig_poisson else self.n_signal_photon
 
