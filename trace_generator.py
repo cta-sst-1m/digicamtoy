@@ -2,15 +2,17 @@ import os.path
 import pickle
 import sys
 import time
-
 import matplotlib.pyplot as plt
 import numpy as np
-import scipy.interpolate
+from utils.pulse_shape import return_interpolant
 
+interpolant = return_interpolant()
 
 class Trace_Generator:
+
+
     def __init__(self, start_time=0., end_time=1000., sampling_time=4., nsb_rate=660 * 1E6 * 1E-9,
-                 mean_crosstalk_production=0.08, debug=False, gain_nsb_dependency=False, n_signal_photon=0.,sig_poisson= True, sigma_e=0.080927083, sigma_1=0.092927083, gain=5.6):
+                 mean_crosstalk_production=0.08, debug=False, gain_nsb_dependency=False, n_signal_photon=0.,sig_poisson= True, sigma_e=0.080927083, sigma_1=0.092927083, gain=5.6, seed=0, baseline=2010., **kwargs):
 
         ## Initialize class attributs
 
@@ -32,7 +34,7 @@ class Trace_Generator:
         self.pe_to_adc = gain
         self.sigma_1 = sigma_1  # spread due to charge resolution in photocounting
         self.sigma_e = sigma_e  # electronic spread in analog to digital conversion
-        self.baseline_shift = 10
+        self.baseline = int(baseline)
         self.cell_capacitance = 85. * 1E-15  # Farad
         self.bias_resistance = 10. * 1E3  # Ohm
         self.gain_nsb_dependency = gain_nsb_dependency
@@ -40,28 +42,59 @@ class Trace_Generator:
             1. + nsb_rate * self.cell_capacitance * self.bias_resistance * 1E9 * self.gain_nsb_dependency)  # gain taking into account nsb dependency
 
         time_steps, amplitudes = np.loadtxt(self.filename_pulse_shape, unpack=True, skiprows=1)
+        self.time_steps_pulse_shape = time_steps
         amplitudes = amplitudes / min(amplitudes)
-        self.interpolated_pulseshape = scipy.interpolate.interp1d(time_steps, amplitudes, kind='cubic',
-                                                                  bounds_error=False, fill_value=0.)
+        self.amplitudes_pulse_shape = amplitudes
+
+
+        self.seed = seed
+        np.random.seed(seed=self.seed)
+
         self.plot_title = 'NSB = ' + str(self.nsb_rate * 1E3) + ' [MHz], $\mu_{XT}$ = ' + str(
             self.mean_crosstalk_production) + ' p.e.'
         self.photon_arrival_time = np.zeros(1)
         self.photon = np.zeros(1)
 
-        ## Compute the FADC signal
+        ## Ploting results
 
-        if (self.n_signal_photon > 0):
+    def __str__(self):
+
+        return ''.join('{}{}'.format(key, val) for key, val in sorted(self.__dict__.items()))
+
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+         return self.next()
+
+    def fast_config(self,n_signal,nsb_rate):
+        self.nsb_rate = nsb_rate
+        self.n_signal_photon = n_signal
+
+    def next(self):
+        self.photon_arrival_time = np.zeros(1)
+        self.photon = np.zeros(1)
+        self.sampling_bins = np.arange(self.start_time, self.end_time + self.sampling_time,
+                                       self.sampling_time)  # FADC sampling times
+        self.adc_count = np.zeros(len(self.sampling_bins))  # FADC values
+
+        ## Compute the FADC signal
+        if (self.n_signal_photon > 0 ):
             self.add_signal_photon()
 
         self.generate_nsb()
-        self.generate_crosstalk()
+
+        if self.mean_crosstalk_production>0:
+
+            self.generate_crosstalk()
+
         self.generate_photon_smearing()
         self.compute_analog_signal()
         self.convert_to_digital()
+        #return self.n_signal_photon,self.nsb_rate,self.adc_count
 
-        ## Ploting results
-
-        if (debug):
+        if (self.debug):
             plt.figure()
             plt.title(self.plot_title)
             plt.step(self.sampling_bins, self.adc_count, label='ADC signal', color='b')
@@ -80,13 +113,18 @@ class Trace_Generator:
 
             plt.show()
 
+    def interpolated_pulseshape(self, time):
+
+        return interpolant(time)
+
+
     def get_adc_count(self):
 
         return self.adc_count
 
     def add_signal_photon(self):
 
-        self.photon_arrival_time[0] = 0 + np.random.uniform(0, 0 + self.sampling_time, size=1)
+        self.photon_arrival_time[0] = np.random.normal(0, self.sampling_time/100., size=1)
         self.cherenkov_time = self.photon_arrival_time[0]
         self.photon[0] = np.random.poisson(self.n_signal_photon) if self.sig_poisson else self.n_signal_photon
 
@@ -288,7 +326,7 @@ class Trace_Generator:
 
         self.generate_electronic_smearing()
         self.adc_count = self.adc_count * self.pe_to_adc
-        self.adc_count = self.adc_count.round().astype(int) + self.baseline_shift
+        self.adc_count = self.adc_count.round().astype(int) + self.baseline
 
     def save(self, mc_number, path='./'):
 
@@ -327,7 +365,7 @@ if __name__ == '__main__':
         end_time = 6000.
         n_cherenkov_photon = 30
         nsb_rate = 100 * 1E-9 * 1E6
-        debug = True
+        debug = False
         path = './'
         N_forced_trigger = 1
         save = False
@@ -347,10 +385,12 @@ if __name__ == '__main__':
             print( 'file named : ' + filename + ' already exists')
             sys.exit("Error message")
 
+    trace_object = Trace_Generator(start_time, end_time, sampling_time, nsb_rate, mean_crosstalk_production, debug, False,
+                            n_cherenkov_photon)
+
     for i in range(int(N_forced_trigger)):
-        adc_count.append(
-            Trace_Generator(start_time, end_time, sampling_time, nsb_rate, mean_crosstalk_production, debug, False,
-                            n_cherenkov_photon).adc_count)
+        trace_object.next()
+        adc_count.append(trace_object.adc_count)
 
     adc_count = np.asarray(adc_count)
     print(adc_count.shape)
