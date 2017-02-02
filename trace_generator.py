@@ -11,8 +11,8 @@ interpolant = return_interpolant()
 class Trace_Generator:
 
 
-    def __init__(self, start_time=0., end_time=1000., sampling_time=4., nsb_rate=660 * 1E6 * 1E-9,
-                 mean_crosstalk_production=0.08, debug=False, gain_nsb_dependency=False, n_signal_photon=0.,sig_poisson= True, sigma_e=0.080927083, sigma_1=0.092927083, gain=5.6, seed=0, baseline=2010., **kwargs):
+    def __init__(self, start_time=-100., end_time=100., sampling_time=4., nsb_rate=660 * 1E6 * 1E-9,
+                 mean_crosstalk_production=0.08, debug=False, gain_nsb_dependency=False, n_signal_photon=0.,sig_poisson= True, sigma_e=0.080927083, sigma_1=0.092927083, gain=5.6, seed=0, baseline=2010., *args, **kwargs):
 
         ## Initialize class attributs
 
@@ -83,13 +83,17 @@ class Trace_Generator:
         if (self.n_signal_photon > 0 ):
             self.add_signal_photon()
 
-        self.generate_nsb()
+        if self.nsb_rate>0:
+            self.generate_nsb()
 
         if self.mean_crosstalk_production>0:
 
             self.generate_crosstalk()
 
-        self.generate_photon_smearing()
+        if self.sigma_1>0:
+
+            self.generate_photon_smearing()
+
         self.compute_analog_signal()
         self.convert_to_digital()
         #return self.n_signal_photon,self.nsb_rate,self.adc_count
@@ -124,7 +128,7 @@ class Trace_Generator:
 
     def add_signal_photon(self):
 
-        self.photon_arrival_time[0] = np.random.normal(0, self.sampling_time/100., size=1)
+        self.photon_arrival_time[0] = np.random.normal(0, self.sampling_time/2., size=1)
         self.cherenkov_time = self.photon_arrival_time[0]
         self.photon[0] = np.random.poisson(self.n_signal_photon) if self.sig_poisson else self.n_signal_photon
 
@@ -365,7 +369,7 @@ if __name__ == '__main__':
         end_time = 6000.
         n_cherenkov_photon = 30
         nsb_rate = 100 * 1E-9 * 1E6
-        debug = False
+        debug = True
         path = './'
         N_forced_trigger = 1
         save = False
