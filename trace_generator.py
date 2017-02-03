@@ -128,7 +128,7 @@ class Trace_Generator:
 
     def add_signal_photon(self):
 
-        self.photon_arrival_time[0] = np.random.normal(0, self.sampling_time/2., size=1)
+        self.photon_arrival_time[0] = np.random.uniform(0., self.sampling_time) # + np.random.normal(0, self.sampling_time/100., size=1)
         self.cherenkov_time = self.photon_arrival_time[0]
         self.photon[0] = np.random.poisson(self.n_signal_photon) if self.sig_poisson else self.n_signal_photon
 
