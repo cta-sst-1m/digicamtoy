@@ -50,8 +50,8 @@ class Trace_Generator:
         self.seed = seed
         np.random.seed(seed=self.seed)
 
-        self.plot_title = 'NSB = ' + str(self.nsb_rate * 1E3) + ' [MHz], $\mu_{XT}$ = ' + str(
-            self.mean_crosstalk_production) + ' p.e.'
+        self.plot_title = '' # 'NSB = ' + str(self.nsb_rate * 1E3) + ' [MHz], $\mu_{XT}$ = ' + str(
+            #self.mean_crosstalk_production) + ' p.e.'
         self.photon_arrival_time = np.zeros(1)
         self.photon = np.zeros(1)
 
@@ -66,7 +66,8 @@ class Trace_Generator:
         return self
 
     def __next__(self):
-         return self.next()
+
+            return self.next()
 
     def fast_config(self,n_signal,nsb_rate):
         self.nsb_rate = nsb_rate
@@ -98,24 +99,25 @@ class Trace_Generator:
         self.convert_to_digital()
         #return self.n_signal_photon,self.nsb_rate,self.adc_count
 
+        axis = None
         if (self.debug):
-            plt.figure()
-            plt.title(self.plot_title)
-            plt.step(self.sampling_bins, self.adc_count, label='ADC signal', color='b')
-            plt.ylabel(r'$ADC_{count}$')
-            plt.xlabel(r'$t$ [ns]')
-            plt.xlim(np.array([self.start_time + self.artificial_backward_time, self.end_time]))
+            #plt.figure()
+            #plt.title(self.plot_title)
+            axis = plt.step(self.sampling_bins, self.adc_count, label='%d [MHz]' % (self.nsb_rate*1E3))#, color='b')
+            #plt.ylabel(r'$ADC count$')
+            #plt.xlabel(r'$t$ [ns]')
+            #plt.xlim(np.array([self.start_time + self.artificial_backward_time, self.end_time]))
             # ~ plt.ylim([0, 150])
-            plt.legend()
+            #plt.legend()
 
-            plt.figure()
-            plt.title(self.plot_title)
-            plt.hist(self.adc_count, bins=range(min(self.adc_count), max(self.adc_count) + 2, 1), facecolor='green',
-                     alpha=0.5, align='left', histtype='step')
-            plt.xlabel(r'$ADC_{count}$')
-            plt.ylabel(r'count')
+            #plt.figure()
+            #plt.title(self.plot_title)
+            #plt.hist(self.adc_count, bins=range(min(self.adc_count), max(self.adc_count) + 2, 1), facecolor='green',
+            #         alpha=0.5, align='left', histtype='step')
+            #plt.xlabel(r'$ADC count$')
+            #plt.ylabel(r'count')
 
-            plt.show()
+        return axis
 
     def interpolated_pulseshape(self, time):
 
@@ -128,7 +130,7 @@ class Trace_Generator:
 
     def add_signal_photon(self):
 
-        self.photon_arrival_time[0] = np.random.uniform(0., self.sampling_time) # + np.random.normal(0, self.sampling_time/100., size=1)
+        self.photon_arrival_time[0] = 0. #-1.54 #np.random.uniform(-self.sampling_time, self.sampling_time) # + np.random.normal(0, self.sampling_time/100., size=1)
         self.cherenkov_time = self.photon_arrival_time[0]
         self.photon[0] = np.random.poisson(self.n_signal_photon) if self.sig_poisson else self.n_signal_photon
 
@@ -147,7 +149,7 @@ class Trace_Generator:
         temp = np.random.uniform(size=mean_photon_number) * (
             self.end_time - self.start_time) + self.start_time
         self.photon_arrival_time = np.append(self.photon_arrival_time, temp)
-        self.photon = np.append(self.photon, np.ones(len(self.photon_arrival_time) - 1))
+        self.photon = np.append(self.photon, np.ones(len(self.photon_arrival_time)))
 
         indices_sorted_time = np.argsort(self.photon_arrival_time)
         self.photon_arrival_time = self.photon_arrival_time[indices_sorted_time]
@@ -176,6 +178,15 @@ class Trace_Generator:
 
         return
 
+    def _poisson_crosstalk(self, mean_crosstalk_production):
+
+        N_cross_talk = np.random.poisson(mean_crosstalk_production)
+        counter = N_cross_talk
+        for i in range(N_cross_talk):
+            counter += self._poisson_crosstalk(mean_crosstalk_production)
+
+        return counter
+
     def generate_crosstalk(self):
         """ create crosstalk for each existing photon
         1) the number of crosstalk photons is randomly generated
@@ -184,7 +195,8 @@ class Trace_Generator:
         crosstalk_photons = np.zeros(len(self.photon))
         for i in range(len(self.photon)):
             for j in range(int(self.photon[i])):
-                crosstalk_photons[i] += np.random.poisson(self.mean_crosstalk_production)
+                #crosstalk_photons[i] += np.random.poisson(self.mean_crosstalk_production)
+                crosstalk_photons[i] += self._poisson_crosstalk(self.mean_crosstalk_production)
 
         self.photon += crosstalk_photons
 
@@ -284,9 +296,9 @@ class Trace_Generator:
             # print np.array(self.interpolated_pulseshape(debug_time))
 
             plt.figure()
-            plt.plot(debug_time, self.interpolated_pulseshape(debug_time), label='pulse shape', color='r')
+            plt.plot(debug_time, self.interpolated_pulseshape(debug_time), label='p.e. event', color='r')
             plt.xlabel(r'$t$ [ns]')
-            plt.ylabel(r'amplitude []')
+            plt.ylabel(r'amplitude [a.u.]')
             plt.xlim(np.array([self.start_time, self.end_time]))
             plt.legend()
 
@@ -296,6 +308,8 @@ class Trace_Generator:
 
         ## Compute by suming pulse shape
 
+        #self.generate_electronic_smearing() # Carefull !!
+
         for i in range(len(self.photon)):
             self.adc_count += self.return_pulseshape(self.sampling_bins - self.photon_arrival_time[i]) * self.photon[i]
 
@@ -304,7 +318,7 @@ class Trace_Generator:
         if (self.debug):
 
             delta_t = 0.01
-            debug_time = np.arange(self.start_time, self.end_time + delta_t, delta_t)
+            debug_time = np.arange(self.start_time + self.artificial_backward_time, self.end_time + delta_t, delta_t)
             debug_analog = np.zeros(len(debug_time))
 
             for i in range(len(self.photon)):
@@ -328,8 +342,9 @@ class Trace_Generator:
         self.photon = self.photon[self.photon_arrival_time >= (self.start_time + self.artificial_backward_time)]
         self.photon_arrival_time = self.photon_arrival_time[self.photon_arrival_time>=(self.start_time + self.artificial_backward_time)]
 
-        self.generate_electronic_smearing()
+        self.generate_electronic_smearing() # TODO check for correlations ??? with gain ?
         self.adc_count = self.adc_count * self.pe_to_adc
+        #self.generate_electronic_smearing() # Carefull !!
         self.adc_count = self.adc_count.round().astype(int) + self.baseline
 
     def save(self, mc_number, path='./'):
@@ -365,17 +380,17 @@ if __name__ == '__main__':
     else:
 
         mc_number = 0
-        start_time = 0.
-        end_time = 6000.
-        n_cherenkov_photon = 30
-        nsb_rate = 100 * 1E-9 * 1E6
-        debug = True
+        start_time = -100.
+        end_time = 100.
+        n_cherenkov_photon = 0.
+        nsb_rate = 0 * 1E-9 * 1E6
+        debug = False
         path = './'
-        N_forced_trigger = 1
+        N_forced_trigger = 100
         save = False
 
-    mean_crosstalk_production = 0.08
-    sampling_time = 4.
+    mean_crosstalk_production = 0.06
+    sampling_time = 3.
     adc_count = []
 
     print( 'Number of force trigger generated = ', N_forced_trigger)
@@ -391,12 +406,41 @@ if __name__ == '__main__':
 
     trace_object = Trace_Generator(start_time, end_time, sampling_time, nsb_rate, mean_crosstalk_production, debug, False,
                             n_cherenkov_photon)
+    nsb_rate = np.logspace(1, 2.5, N_forced_trigger) * 1E-3
+    nsb_rate = np.array([2, 200, 660]) * 1E-3
+    #fig = plt.figure()
+    np.random.seed(122)
+    plt.figure()
+    for j in range(len(nsb_rate)):
 
-    for i in range(int(N_forced_trigger)):
-        trace_object.next()
-        adc_count.append(trace_object.adc_count)
+        adc_count = []
+        trace_object.nsb_rate = nsb_rate[j]
+
+        for i in range(int(N_forced_trigger)):
+            axis = trace_object.next()
+            adc_count.append(trace_object.adc_count)
+        data = np.array(adc_count).ravel()
+        plt.hist(data, bins=np.arange(np.min(data), np.max(data), 1), align='left',
+                 histtype='step', label='%d [MHz]' % (nsb_rate[j]*1E3), lw=2)
+        #fig.axes.append(axis)
+    plt.xlabel('ADC count')
+    plt.ylabel('entries')
+    plt.legend()
+    #plt.xlim([-100, 100])
+        #adc_count.append(np.max(trace_object.adc_count))
+
+    plt.show()
+
 
     adc_count = np.asarray(adc_count)
+    adc_count = np.random.poisson(n_cherenkov_photon, size=N_forced_trigger)
+    plt.figure()
+    plt.hist(adc_count, bins=np.arange(np.min(adc_count), np.max(adc_count), 1./10.), align='left', histtype='bar', label='Poisson')
+    plt.xlabel('[u.a.]')
+    plt.ylabel('$N_{trigger}$')
+    plt.legend()
+
+
     print(adc_count.shape)
     print( time.time() - timer)
 
