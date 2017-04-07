@@ -4,13 +4,14 @@ verbose : True
 output_directory : /home/alispach/data/digicam_commissioning/trigger/mc/
 #file_basename : nsb_scan_seed_%d_sandbox.hdf5
 #file_basename : nsb_scan_seed_%d.hdf5
-file_basename : nsb_scan_seed_%d_digicam_comp.hdf5
+file_basename : electronic_noise_seed_%d.hdf5
+#file_basename : nsb_scan_seed_%d_digicam_comp.hdf5
 seed : [0]
-events_per_level : 4000 # number of events per signal per nsb
+events_per_level : 10000 # number of events per signal per nsb
 
 # DigiCam config
 photon_times : [0, 10000, 4]
-nsb_rate : [3, 36, 129, 385, 589]#, 100, 150, 200] # nsb rates [MHz]
+nsb_rate : [0]#, 100, 150, 200] # nsb rates [MHz]
 signal : [0] # signal in p.e.
 poisson_signal : False # generate signal according to a Poisson distribution
 gain : 5.6 # [ADC/p.e]
