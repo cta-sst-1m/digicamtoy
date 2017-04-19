@@ -1,6 +1,6 @@
 from yaml import load
 from optparse import OptionParser
-import sys, logging
+import sys, logging, os
 
 if __name__ == '__main__':
 
@@ -62,8 +62,14 @@ if __name__ == '__main__':
 
     if options.create_dataset:
         # Call the creation function
-        log.info('\t\t-|> Create the Monte Carlo dataset')
-        production_module.create_dataset(options)
+
+        if not os.path.exists(options.output_directory + options.file_basename):
+            log.info('\t\t-|> Create the Monte Carlo dataset')
+            production_module.create_dataset(options)
+
+        else:
+
+            log.error('File %s already exists' % (options.output_directory + options.file_basename))
 
     if options.display_results:
 
