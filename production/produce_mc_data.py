@@ -95,6 +95,6 @@ def create_dataset(options):
                 level_group.create_dataset('data', data=data, dtype=np.uint16)
                 hdf5.flush()
         hdf5.close()
-        log.info('--|> File %s.hdf5 saved to %s\n' % (options.file_basename % file_index))
+        log.info('--|> File %s.hdf5 saved to %s\n' % (options.file_basename % file_index, options.output_directory))
 
     return
