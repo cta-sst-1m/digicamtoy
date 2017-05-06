@@ -12,7 +12,7 @@ class Trace_Generator:
 
 
     def __init__(self, start_time=-100., end_time=100., sampling_time=4., nsb_rate=660 * 1E6 * 1E-9,
-                 mean_crosstalk_production=0.08, debug=False, gain_nsb_dependency=False, n_signal_photon=0.,sig_poisson= True, sigma_e=0.080927083, sigma_1=0.092927083, gain=5.6, seed=0, baseline=2010., *args, **kwargs):
+                 mean_crosstalk_production=0.08, debug=False, gain_nsb_dependency=False, n_signal_photon=0.,sig_poisson= True, sigma_e=0.080927083, sigma_1=0.092927083, gain=5.6, baseline=2010., *args, **kwargs):
 
         ## Initialize class attributs
 
@@ -46,9 +46,7 @@ class Trace_Generator:
         amplitudes = amplitudes / min(amplitudes)
         self.amplitudes_pulse_shape = amplitudes
 
-
-        self.seed = seed
-        np.random.seed(seed=self.seed) #TODO change seed by passing the np.random.RandomState() instead
+         #TODO change seed by passing the np.random.RandomState() instead
 
         self.plot_title = '' # 'NSB = ' + str(self.nsb_rate * 1E3) + ' [MHz], $\mu_{XT}$ = ' + str(
             #self.mean_crosstalk_production) + ' p.e.'

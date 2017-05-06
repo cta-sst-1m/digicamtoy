@@ -8,11 +8,10 @@ from container.container import Calibration_Container
 
 def create_dataset(options):
 
-
     camera_parameters = Calibration_Container(filename=options.calibration_filename)
     log = logging.getLogger(sys.modules['__main__'].__name__ + '.' + __name__)
-    log.debug('Reading calibration container %s \n' %options.calibration_filename)
-    pbar = tqdm(total=len(options.seed) * len(options.nsb_rate) * len(options.signal) * options.events_per_level)
+    log.debug('Reading calibration container %s \n' % options.calibration_filename)
+    pbar = tqdm(total=len(options.file_list) * len(options.nsb_rate) * len(options.signal) * options.events_per_level)
 
     generator_parameters = {'start_time': options.photon_times[0],
                             'end_time': options.photon_times[1],
@@ -25,7 +24,6 @@ def create_dataset(options):
                             'sigma_1': None,
                             'gain': None,
                             'baseline': None,
-                            'seed': None,
                             'gain_nsb_dependency': options.gain_nsb_dependency}
 
     simulation_parameters = {'start_time': options.photon_times[0],
@@ -40,18 +38,13 @@ def create_dataset(options):
                              'gain': camera_parameters.gain['value'],
                              'baseline': camera_parameters.baseline['value'],
                              'dark_rate' : camera_parameters.dark_count_rate['value'],
-                             'seed': None,
                              'gain_nsb_dependency': options.gain_nsb_dependency}
 
-    for seed in options.seed:
+    for file_index in options.file_list:
 
-        generator_parameters['seed'] = seed
-        simulation_parameters['seed'] = seed
+        log.debug('--|> Creating file %s \n' % (options.file_basename % file_index))
 
-
-        log.debug('--|> Creating file %s with seed %d\n' % (options.file_basename % seed, seed))
-
-        hdf5 = h5py.File(options.output_directory + options.file_basename % seed, 'w')
+        hdf5 = h5py.File(options.output_directory + options.file_basename % file_index, 'w')
         camera_parameters_group = hdf5.create_group('simulation_parameters')
 
         for key, val in simulation_parameters.items():
@@ -73,7 +66,6 @@ def create_dataset(options):
                     generator_parameters['gain'] = camera_parameters.gain['value'][pixel_id]
                     generator_parameters['baseline'] = camera_parameters.baseline['value'][pixel_id]
                     generator_parameters['nsb_rate'] = (nsb + camera_parameters.dark_count_rate['value'][pixel_id]) / 1E3
-                    generator_parameters['seed'] += 1
 
                     generator.append(Trace_Generator(**generator_parameters))
 
@@ -103,6 +95,6 @@ def create_dataset(options):
                 level_group.create_dataset('data', data=data, dtype=np.uint16)
                 hdf5.flush()
         hdf5.close()
-        log.info('--|> File %s.hdf5 saved to %s\n' % (options.file_basename % seed, options.output_directory))
+        log.info('--|> File %s.hdf5 saved to %s\n' % (options.file_basename % file_index))
 
     return

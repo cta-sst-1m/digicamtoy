@@ -6,7 +6,7 @@ output_directory : /home/alispach/data/digicam_commissioning/trigger/mc/
 #file_basename : nsb_scan_seed_%d.hdf5
 file_basename : electronic_noise_seed_%d.hdf5
 #file_basename : nsb_scan_seed_%d_digicam_comp.hdf5
-seed : [0]
+file_list : [0]
 events_per_level : 10000 # number of events per signal per nsb
 
 # DigiCam config
