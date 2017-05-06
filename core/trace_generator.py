@@ -48,7 +48,7 @@ class Trace_Generator:
 
 
         self.seed = seed
-        np.random.seed(seed=self.seed)
+        np.random.seed(seed=self.seed) #TODO change seed by passing the np.random.RandomState() instead
 
         self.plot_title = '' # 'NSB = ' + str(self.nsb_rate * 1E3) + ' [MHz], $\mu_{XT}$ = ' + str(
             #self.mean_crosstalk_production) + ' p.e.'
