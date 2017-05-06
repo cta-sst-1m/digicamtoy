@@ -88,11 +88,12 @@ class Calibration_Container():
 
 if __name__ == '__main__':
 
-    standard_camera = Calibration_Container()
-    simple_camera = Calibration_Container()
 
-    standard_camera.initialize_standard_camera()
-    simple_camera.initialize_simple_camera()
+    camera_container = Calibration_Container()
 
-    standard_camera.save(filename='standard_camera.pk')
-    simple_camera.save(filename='simple_camera.pk')
+    camera_container.initialize_standard_camera()
+    camera_container.save(filename='standard_camera.pk')
+    camera_container.initialize_simple_camera(dark_count_rate=0.)
+    camera_container.save(filename='simple_camera.pk')
+
+
