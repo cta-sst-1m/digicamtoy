@@ -1,6 +1,7 @@
 from yaml import load
 from optparse import OptionParser
 import sys, logging, os
+from utils import logger
 
 if __name__ == '__main__':
 
@@ -46,6 +47,7 @@ if __name__ == '__main__':
 
     __name__ = options.production_module
     # load the analysis module
+    logger.initialise_logger(options)
     print('--------------------------', options.production_module)
     production_module = __import__('production.%s' % options.production_module,\
                                      locals=None, \

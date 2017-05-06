@@ -1,0 +1,18 @@
+production_module : produce_mc_data
+log_file_basename : log
+verbose : True
+
+output_directory : /home/alispach/data/digicam_commissioning/trigger/mc/
+file_basename : sandbox_%d.hdf5
+seed : [0]
+events_per_level : 10 # number of events per signal per nsb
+
+# DigiCam config
+photon_times : [0, 200, 4]
+nsb_rate : [3, 4] # nsb rates [MHz]
+signal : [0] # signal in p.e.
+poisson_signal : True # generate signal according to a Poisson distribution
+
+# PDP params
+calibration_filename : /home/alispach/Documents/PhD/ctasoft/digicamtoy/container/simple_camera.pk
+gain_nsb_dependency : True
