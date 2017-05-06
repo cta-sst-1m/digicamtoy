@@ -9,7 +9,7 @@ class Calibration_Container():
     each field contains a dict() of np.array
     """
 
-    def __init__(self, filename=None):
+    def __init__(self, n_pixels=1296, filename=None):
 
         if filename is not None:
 
@@ -17,8 +17,8 @@ class Calibration_Container():
 
         else:
 
-            self.pixel_id = [i for i in range(1296)]
-            self.n_pixels = len(self.pixel_id)
+            self.n_pixels = n_pixels
+            self.pixel_id = [i for i in range(n_pixels)]
 
             ### SiPMs
 
@@ -95,5 +95,21 @@ if __name__ == '__main__':
     camera_container.save(filename='standard_camera.pk')
     camera_container.initialize_simple_camera(dark_count_rate=0.)
     camera_container.save(filename='simple_camera.pk')
+
+    cluster_7_container = Calibration_Container(n_pixels=3*7)
+    cluster_7_container.initialize_standard_camera(dark_count_rate=0.)
+    cluster_7_container.save(filename='standard_cluster_7.pk')
+    cluster_7_container.initialize_simple_camera(dark_count_rate=0.)
+    cluster_7_container.save(filename='simple_cluster_7.pk')
+
+    cluster_19_container = Calibration_Container(n_pixels=9*3)
+    cluster_19_container.initialize_standard_camera(dark_count_rate=0.)
+    cluster_19_container.save(filename='standard_cluster_19.pk')
+    cluster_19_container.initialize_simple_camera(dark_count_rate=0.)
+    cluster_19_container.save(filename='simple_cluster_19.pk')
+
+
+
+
 
 
