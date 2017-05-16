@@ -1,0 +1,11 @@
+production_module : produce_combined_mc_data
+log_file_basename : log
+verbose : True
+
+output_directory : /home/alispach/data/digicam_commissioning/trigger/mc/
+file_basename : sandbox_999909009.hdf5
+file_1 : dark_camera_1.hdf5
+file_2 : nsb_cluster_7_1.hdf5
+
+pixel_list : [554, 588, 589, 590, 591, 624, 625, 626, 627, 628, 660, 661, 662, 663, 696, 697, 698, 699, 700, 733, 734]
+

@@ -33,7 +33,7 @@ class Calibration_Container():
             ### LEDs
 
             self.ac_led = {'value' : [[None]*4]*self.n_pixels, 'error': [[None]*4]*self.n_pixels, 'time_stamp': [None]*self.n_pixels}
-            self.dc_led = {'value' : [[None]*2]*self.n_pixels, 'error': [[None]*2]*self.n_pixels, 'time_stamp': [None]*self.n_pixels}
+            self.dc_led = {'value' : [[None]*3]*self.n_pixels, 'error': [[None]*3]*self.n_pixels, 'time_stamp': [None]*self.n_pixels}
 
 
 
@@ -76,7 +76,7 @@ class Calibration_Container():
         self.update('mean_temperature', self.pixel_id, np.random.normal(mean_temperature, 1, size=self.n_pixels))
         self.update('dark_count_rate', self.pixel_id, np.random.normal(dark_count_rate, 0.5, size=self.n_pixels))
 
-    def initialize_simple_camera(self, gain=5.6, electronic_noise=0.8, gain_smearing=0.8, crosstalk=0.07, baseline=500, mean_temperature=19, dark_count_rate=3.):
+    def initialize_simple_camera(self, gain=5.8, electronic_noise=0.8, gain_smearing=0.8, crosstalk=0.07, baseline=500, mean_temperature=19, dark_count_rate=2.7):
 
         self.update('gain', self.pixel_id, np.ones(self.n_pixels)*gain)
         self.update('electronic_noise', self.pixel_id, np.ones(self.n_pixels)*electronic_noise)
@@ -107,6 +107,17 @@ if __name__ == '__main__':
     cluster_19_container.save(filename='standard_cluster_19.pk')
     cluster_19_container.initialize_simple_camera(dark_count_rate=0.)
     cluster_19_container.save(filename='simple_cluster_19.pk')
+
+    pixel_container = Calibration_Container(n_pixels=1)
+    pixel_container.initialize_simple_camera(dark_count_rate=0.)
+    pixel_container.save(filename='simple_pixel.pk')
+
+    data = np.load('/home/alispach/data/digicam_commissioning/dc_calibration/dc_calibration.npz')
+    fit_parameters = data['fit_parameters']
+
+
+    cluster_7_container.update('dc_led', indices=np.arange(0, fit_parameters.shape[0]), value=fit_parameters)
+    cluster_7_container.save(filename='digicam_cluster_7.pk')
 
 
 

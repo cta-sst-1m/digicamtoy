@@ -7,7 +7,7 @@ file_list : [0]
 events_per_level : 1000 # number of events per signal per nsb
 
 # DigiCam config
-photon_times : [0, 200, 4]
+photon_times : [0, 200, 4] # ns
 nsb_rate : [0, 3, 40, 80, 125, 660] # nsb rates [MHz]
 signal : [0] # signal in p.e.
 poisson_signal : True # generate signal according to a Poisson distribution

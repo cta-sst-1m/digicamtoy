@@ -2,17 +2,18 @@ production_module : produce_mc_data
 log_file_basename : 20170506
 verbose : True
 
-output_directory : /data/datasets/monte_carlo/digicam_toy/
+output_directory : /home/alispach/data/digicam_commissioning/trigger/mc/
 file_basename : nsb_cluster_7_%d.hdf5
 file_list : [1]
 events_per_level : 10 # number of events per signal per nsb
 
 # DigiCam config
-photon_times : [0, 200, 4]
-nsb_rate : [660]#[0, 3, 40, 80, 125, 660] # nsb rates [MHz]
+photon_times : [0, 40000, 4]
+#nsb_rate : [660]#[0, 3, 40, 80, 125, 660] # nsb rates [MHz]
+dc_level : [0, 292, 304, 311, 323 , 339] # nsb rates [MHz]
 signal : [0] # signal in p.e.
 poisson_signal : True # generate signal according to a Poisson distribution
 
 # PDP params
-calibration_filename : /data/software/digicam_toy/container/simple_cluster_7.pk
+calibration_filename : container/digicam_cluster_7.pk
 gain_nsb_dependency : True

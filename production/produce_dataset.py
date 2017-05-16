@@ -15,8 +15,10 @@ def create_dataset(options):
                  'sampling_time': options.photon_times[2], 'nsb_rate': options.nsb_rate[0],
                  'mean_crosstalk_production': options.crosstalk,
                  'n_signal_photon': options.signal[0], 'sig_poisson': options.poisson_signal,
-                 'sigma_e': options.sigma_e/options.gain,
-                 'sigma_1': options.sigma_1/options.gain, 'gain': options.gain, 'baseline': options.baseline,
+                 'sigma_e': options.sigma_e,
+                 'sigma_1': options.sigma_1,
+                 'gain': options.gain,
+                 'baseline': options.baseline,
                  'seed': options.seed[0],
                  'gain_nsb_dependency': options.gain_nsb_dependency}
 

@@ -1,0 +1,17 @@
+production_module : produce_mc_data
+verbose : True
+
+output_directory : test/data/
+file_basename : nsb_scan_1pixel_%d_gain_drop_false.hdf5
+file_list : [0]
+events_per_level : 10000 # number of events per signal per nsb
+
+# DigiCam config
+photon_times : [0, 200, 4] # ns
+nsb_rate : [0, 3, 10, 20, 30, 40, 50, 80, 100, 125, 200, 400, 500, 660] # nsb rates [MHz]
+signal : [0] # signal in p.e.
+poisson_signal : True # generate signal according to a Poisson distribution
+
+# PDP params
+calibration_filename : container/simple_pixel.pk
+gain_nsb_dependency : False

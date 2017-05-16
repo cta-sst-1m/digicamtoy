@@ -8,11 +8,11 @@ from utils.pulse_shape import return_interpolant
 
 interpolant = return_interpolant()
 
+
 class Trace_Generator:
-
-
     def __init__(self, start_time=-100., end_time=100., sampling_time=4., nsb_rate=660 * 1E6 * 1E-9,
-                 mean_crosstalk_production=0.08, debug=False, gain_nsb_dependency=False, n_signal_photon=0.,sig_poisson= True, sigma_e=0.080927083, sigma_1=0.092927083, gain=5.6, baseline=2010., *args, **kwargs):
+                 mean_crosstalk_production=0.08, debug=False, gain_nsb_dependency=False, n_signal_photon=0.,
+                 sig_poisson=True, sigma_e=0.8, sigma_1=0.8, gain=5.6, baseline=2010., time_signal=0, *args, **kwargs):
 
         ## Initialize class attributs
 
@@ -28,46 +28,49 @@ class Trace_Generator:
                                        self.sampling_time)  # FADC sampling times
         self.adc_count = np.zeros(len(self.sampling_bins))  # FADC values
         self.n_signal_photon = n_signal_photon  # number of Cherenkov photons
-        self.sig_poisson = sig_poisson # is the number of signal photons distributed as a poisson?
+        self.time_signal = time_signal
+        self.sig_poisson = sig_poisson  # is the number of signal photons distributed as a poisson?
 
         self.filename_pulse_shape = 'utils/pulse_SST-1M_AfterPreampLowGain.dat'  # pulse shape template file
         self.pe_to_adc = gain
-        self.sigma_1 = sigma_1  # spread due to charge resolution in photocounting
-        self.sigma_e = sigma_e  # electronic spread in analog to digital conversion
+        self.sigma_e = sigma_e / gain  # electronic spread in analog to digital conversion
         self.baseline = int(baseline)
         self.cell_capacitance = 85. * 1E-15  # Farad
         self.bias_resistance = 10. * 1E3  # Ohm
         self.gain_nsb_dependency = gain_nsb_dependency
         self.gain = 1. / (
             1. + nsb_rate * self.cell_capacitance * self.bias_resistance * 1E9 * self.gain_nsb_dependency)  # gain taking into account nsb dependency
+        self.sigma_1 = sigma_1 / (self.gain * self.pe_to_adc)  # spread due to charge resolution in photocounting
 
         time_steps, amplitudes = np.loadtxt(self.filename_pulse_shape, unpack=True, skiprows=1)
         self.time_steps_pulse_shape = time_steps
         amplitudes = amplitudes / min(amplitudes)
         self.amplitudes_pulse_shape = amplitudes
 
-         #TODO change seed by passing the np.random.RandomState() instead
+        # TODO change seed by passing the np.random.RandomState() instead
 
-        self.plot_title = '' # 'NSB = ' + str(self.nsb_rate * 1E3) + ' [MHz], $\mu_{XT}$ = ' + str(
-            #self.mean_crosstalk_production) + ' p.e.'
+        self.plot_title = ''  # 'NSB = ' + str(self.nsb_rate * 1E3) + ' [MHz], $\mu_{XT}$ = ' + str(
+        # self.mean_crosstalk_production) + ' p.e.'
         self.photon_arrival_time = np.zeros(1)
         self.photon = np.zeros(1)
 
-        ## Ploting results
+        # Ploting results
+
+    def compute_gain_drop(self, cell_capacitance, bias_resistance, nsb_rate):
+        return
 
     def __str__(self):
 
         return ''.join('{}{}'.format(key, val) for key, val in sorted(self.__dict__.items()))
-
 
     def __iter__(self):
         return self
 
     def __next__(self):
 
-            return self.next()
+        return self.next()
 
-    def fast_config(self,n_signal,nsb_rate):
+    def fast_config(self, n_signal, nsb_rate):
         self.nsb_rate = nsb_rate
         self.n_signal_photon = n_signal
 
@@ -79,41 +82,40 @@ class Trace_Generator:
         self.adc_count = np.zeros(len(self.sampling_bins))  # FADC values
 
         ## Compute the FADC signal
-        if (self.n_signal_photon > 0 ):
+        if (self.n_signal_photon > 0):
             self.add_signal_photon()
 
-        if self.nsb_rate>0:
+        if self.nsb_rate > 0:
             self.generate_nsb()
 
-        if self.mean_crosstalk_production>0:
-
+        if self.mean_crosstalk_production > 0:
             self.generate_crosstalk()
 
-        if self.sigma_1>0:
-
+        if self.sigma_1 > 0:
             self.generate_photon_smearing()
 
         self.compute_analog_signal()
         self.convert_to_digital()
-        #return self.n_signal_photon,self.nsb_rate,self.adc_count
+        # return self.n_signal_photon,self.nsb_rate,self.adc_count
 
         axis = None
         if (self.debug):
-            #plt.figure()
-            #plt.title(self.plot_title)
-            axis = plt.step(self.sampling_bins, self.adc_count, label='%d [MHz]' % (self.nsb_rate*1E3))#, color='b')
-            #plt.ylabel(r'$ADC count$')
-            #plt.xlabel(r'$t$ [ns]')
-            #plt.xlim(np.array([self.start_time + self.artificial_backward_time, self.end_time]))
+            # plt.figure()
+            # plt.title(self.plot_title)
+            axis = plt.step(self.sampling_bins, self.adc_count,
+                            label='%d [MHz]' % (self.nsb_rate * 1E3))  # , color='b')
+            # plt.ylabel(r'$ADC count$')
+            # plt.xlabel(r'$t$ [ns]')
+            # plt.xlim(np.array([self.start_time + self.artificial_backward_time, self.end_time]))
             # ~ plt.ylim([0, 150])
-            #plt.legend()
+            # plt.legend()
 
-            #plt.figure()
-            #plt.title(self.plot_title)
-            #plt.hist(self.adc_count, bins=range(min(self.adc_count), max(self.adc_count) + 2, 1), facecolor='green',
+            # plt.figure()
+            # plt.title(self.plot_title)
+            # plt.hist(self.adc_count, bins=range(min(self.adc_count), max(self.adc_count) + 2, 1), facecolor='green',
             #         alpha=0.5, align='left', histtype='step')
-            #plt.xlabel(r'$ADC count$')
-            #plt.ylabel(r'count')
+            # plt.xlabel(r'$ADC count$')
+            # plt.ylabel(r'count')
 
         return axis
 
@@ -121,14 +123,14 @@ class Trace_Generator:
 
         return interpolant(time)
 
-
     def get_adc_count(self):
 
         return self.adc_count
 
     def add_signal_photon(self):
 
-        self.photon_arrival_time[0] = 0. #-1.54 #np.random.uniform(-self.sampling_time, self.sampling_time) # + np.random.normal(0, self.sampling_time/100., size=1)
+        self.photon_arrival_time[
+            0] = self.time_signal  # -1.54 #np.random.uniform(-self.sampling_time, self.sampling_time) # + np.random.normal(0, self.sampling_time/100., size=1)
         self.cherenkov_time = self.photon_arrival_time[0]
         self.photon[0] = np.random.poisson(self.n_signal_photon) if self.sig_poisson else self.n_signal_photon
 
@@ -139,8 +141,7 @@ class Trace_Generator:
         """
         mean_photon_number = np.random.poisson((self.end_time - self.start_time) * self.nsb_rate)
 
-
-        #print(mean_photon_number)
+        # print(mean_photon_number)
 
         # ~ if (mean_photon_number>0):
 
@@ -164,7 +165,6 @@ class Trace_Generator:
             else:
 
                 label = 'NSB'
-
 
             plt.figure()
             plt.title(self.plot_title)
@@ -193,7 +193,7 @@ class Trace_Generator:
         crosstalk_photons = np.zeros(len(self.photon))
         for i in range(len(self.photon)):
             for j in range(int(self.photon[i])):
-                #crosstalk_photons[i] += np.random.poisson(self.mean_crosstalk_production)
+                # crosstalk_photons[i] += np.random.poisson(self.mean_crosstalk_production)
                 crosstalk_photons[i] += self._poisson_crosstalk(self.mean_crosstalk_production)
 
         self.photon += crosstalk_photons
@@ -254,8 +254,6 @@ class Trace_Generator:
 
                 label = 'NSB + XT + Smearing'
 
-
-
             plt.figure()
             plt.title(self.plot_title)
             plt.bar(self.photon_arrival_time, self.photon, label=label, color='b')
@@ -306,7 +304,7 @@ class Trace_Generator:
 
         ## Compute by suming pulse shape
 
-        #self.generate_electronic_smearing() # Carefull !!
+        # self.generate_electronic_smearing() # Carefull !!
 
         for i in range(len(self.photon)):
             self.adc_count += self.return_pulseshape(self.sampling_bins - self.photon_arrival_time[i]) * self.photon[i]
@@ -338,11 +336,12 @@ class Trace_Generator:
         self.adc_count = np.delete(self.adc_count, indices_to_remove)
         self.sampling_bins = np.delete(self.sampling_bins, indices_to_remove)
         self.photon = self.photon[self.photon_arrival_time >= (self.start_time + self.artificial_backward_time)]
-        self.photon_arrival_time = self.photon_arrival_time[self.photon_arrival_time>=(self.start_time + self.artificial_backward_time)]
+        self.photon_arrival_time = self.photon_arrival_time[
+            self.photon_arrival_time >= (self.start_time + self.artificial_backward_time)]
 
-        self.generate_electronic_smearing() # TODO check for correlations ??? with gain ?
+        self.generate_electronic_smearing()  # TODO check for correlations ??? with gain ?
         self.adc_count = self.adc_count * self.pe_to_adc
-        #self.generate_electronic_smearing() # Carefull !!
+        # self.generate_electronic_smearing() # Carefull !!
         self.adc_count = self.adc_count.round().astype(int) + self.baseline
 
     def save(self, mc_number, path='./'):
@@ -350,7 +349,7 @@ class Trace_Generator:
         filename = path + 'TRACE' + str(mc_number).zfill(5) + '.p'
 
         if os.path.isfile(filename):
-            print ('file named : ' + filename + ' already exists')
+            print('file named : ' + filename + ' already exists')
             sys.exit("Error message")
 
         with open(filename, 'wb') as handle:
@@ -391,7 +390,7 @@ if __name__ == '__main__':
     sampling_time = 3.
     adc_count = []
 
-    print( 'Number of force trigger generated = ', N_forced_trigger)
+    print('Number of force trigger generated = ', N_forced_trigger)
 
     timer = time.time()
 
@@ -399,14 +398,15 @@ if __name__ == '__main__':
 
     if save:
         if os.path.isfile(filename):
-            print( 'file named : ' + filename + ' already exists')
+            print('file named : ' + filename + ' already exists')
             sys.exit("Error message")
 
-    trace_object = Trace_Generator(start_time, end_time, sampling_time, nsb_rate, mean_crosstalk_production, debug, False,
-                            n_cherenkov_photon)
+    trace_object = Trace_Generator(start_time, end_time, sampling_time, nsb_rate, mean_crosstalk_production, debug,
+                                   False,
+                                   n_cherenkov_photon)
     nsb_rate = np.logspace(1, 2.5, N_forced_trigger) * 1E-3
     nsb_rate = np.array([2, 200, 660]) * 1E-3
-    #fig = plt.figure()
+    # fig = plt.figure()
     np.random.seed(122)
     plt.figure()
     for j in range(len(nsb_rate)):
@@ -419,28 +419,27 @@ if __name__ == '__main__':
             adc_count.append(trace_object.adc_count)
         data = np.array(adc_count).ravel()
         plt.hist(data, bins=np.arange(np.min(data), np.max(data), 1), align='left',
-                 histtype='step', label='%d [MHz]' % (nsb_rate[j]*1E3), lw=2)
-        #fig.axes.append(axis)
+                 histtype='step', label='%d [MHz]' % (nsb_rate[j] * 1E3), lw=2)
+        # fig.axes.append(axis)
     plt.xlabel('ADC count')
     plt.ylabel('entries')
     plt.legend()
-    #plt.xlim([-100, 100])
-        #adc_count.append(np.max(trace_object.adc_count))
+    # plt.xlim([-100, 100])
+    # adc_count.append(np.max(trace_object.adc_count))
 
     plt.show()
-
 
     adc_count = np.asarray(adc_count)
     adc_count = np.random.poisson(n_cherenkov_photon, size=N_forced_trigger)
     plt.figure()
-    plt.hist(adc_count, bins=np.arange(np.min(adc_count), np.max(adc_count), 1./10.), align='left', histtype='bar', label='Poisson')
+    plt.hist(adc_count, bins=np.arange(np.min(adc_count), np.max(adc_count), 1. / 10.), align='left', histtype='bar',
+             label='Poisson')
     plt.xlabel('[u.a.]')
     plt.ylabel('$N_{trigger}$')
     plt.legend()
 
-
     print(adc_count.shape)
-    print( time.time() - timer)
+    print(time.time() - timer)
 
     if save:
         with open(filename, 'wb') as handle:
