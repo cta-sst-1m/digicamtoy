@@ -1,0 +1,19 @@
+production_module : produce_mc_data
+verbose : True
+
+output_directory : /data/datasets/monte_carlo/digicam_toy/pulse_template/
+file_basename : dark_with_signal_%d.hdf5
+file_list : [0]
+events_per_level : 10000 # number of events per signal per nsb
+
+# DigiCam config
+photon_times : [0, 364, 4] # ns
+signal : [40] # signal in p.e.
+poisson_signal : True # generate signal according to a Poisson distribution
+dc_level : [0]
+nsb_rate : [3] # nsb rates [MHz]
+
+
+# PDP params
+calibration_filename : /data/software/digicam_toy/container/standard_camera.pk
+gain_nsb_dependency : True
