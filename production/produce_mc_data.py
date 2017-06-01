@@ -49,7 +49,15 @@ def create_dataset(options):
 
         log.debug('--|> Creating file %s \n' % (options.file_basename % file_index))
 
-        hdf5 = h5py.File(options.output_directory + options.file_basename % file_index, 'x') # Create file, fail if exists
+        try:
+
+            hdf5 = h5py.File(options.output_directory + options.file_basename % file_index, 'x') # Create file, fail if exists
+
+        except OSError:
+
+            log.error('File %s already exists' % options.file_basename % file_index)
+            exit()
+            
         camera_parameters_group = hdf5.create_group('simulation_parameters')
 
         for key, val in simulation_parameters.items():
