@@ -53,7 +53,7 @@ def create_dataset(options):
         camera_parameters_group = hdf5.create_group('simulation_parameters')
 
         for key, val in simulation_parameters.items():
-            camera_parameters_group.create_dataset(str(key), data=val)
+            camera_parameters_group.create_dataset(key, data=val)
         for i, dc_level in enumerate(options.dc_level):
 
             for j, signal in enumerate(options.signal):
