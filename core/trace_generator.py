@@ -12,7 +12,8 @@ interpolant = return_interpolant()
 class Trace_Generator:
     def __init__(self, start_time=-100., end_time=100., sampling_time=4., nsb_rate=660 * 1E6 * 1E-9,
                  mean_crosstalk_production=0.08, debug=False, gain_nsb_dependency=False, n_signal_photon=0.,
-                 sig_poisson=True, sigma_e=0.8, sigma_1=0.8, gain=5.6, baseline=2010., time_signal=0, *args, **kwargs):
+                 sig_poisson=True, sigma_e=0.8, sigma_1=0.8, gain=5.6, baseline=2010., time_signal=0, jitter_signal=0,
+                 pulse_shape_spline=None, *args, **kwargs):
 
         ## Initialize class attributs
 
@@ -29,6 +30,7 @@ class Trace_Generator:
         self.adc_count = np.zeros(len(self.sampling_bins))  # FADC values
         self.n_signal_photon = n_signal_photon  # number of Cherenkov photons
         self.time_signal = time_signal
+        self.jitter_signal = jitter_signal
         self.sig_poisson = sig_poisson  # is the number of signal photons distributed as a poisson?
 
         self.filename_pulse_shape = 'utils/pulse_SST-1M_AfterPreampLowGain.dat'  # pulse shape template file
@@ -129,8 +131,16 @@ class Trace_Generator:
 
     def add_signal_photon(self):
 
+        if self.jitter_signal > 0:
+
+            jitter = np.random.normal(0, self.jitter_signal)
+
+        else:
+
+            jitter = 0.
+
         self.photon_arrival_time[
-            0] = self.time_signal  # -1.54 #np.random.uniform(-self.sampling_time, self.sampling_time) # + np.random.normal(0, self.sampling_time/100., size=1)
+            0] = self.time_signal + jitter  # -1.54 #np.random.uniform(-self.sampling_time, self.sampling_time) # + np.random.normal(0, self.sampling_time/100., size=1)
         self.cherenkov_time = self.photon_arrival_time[0]
         self.photon[0] = np.random.poisson(self.n_signal_photon) if self.sig_poisson else self.n_signal_photon
 

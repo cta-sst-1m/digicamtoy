@@ -1,0 +1,19 @@
+production_module : produce_mc_data
+verbose : True
+
+output_directory : /home/alispach/data/digicam_commissioning/timing/mc/
+file_basename : ac_dc_scan_mc_%d.hdf5
+file_list : [4]
+events_per_level : 1000 # number of events per signal per nsb
+
+# DigiCam config
+photon_times : [0, 200, 4] # ns
+signal : [0, 1, 2, 3, 4, 5 ,6 , 7, 8, 9, 10, 12, 14, 16, 18, 20, 24, 28, 32, 38, 44, 52, 60, 70, 80, 90, 100] # signal in p.e.
+poisson_signal : True # generate signal according to a Poisson distribution
+dc_level : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 14]
+nsb_rate : [0, 2, 3, 6, 9, 13, 20, 32, 49, 75, 115, 178, 274, 422, 649] # nsb rates [MHz]
+
+
+# PDP params
+calibration_filename : /home/alispach/Documents/PhD/ctasoft/digicamtoy/container/simple_cluster_7_unsynced_constant_jitter.pk
+gain_nsb_dependency : True

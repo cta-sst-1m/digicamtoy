@@ -25,7 +25,8 @@ def create_dataset(options):
                             'gain': None,
                             'baseline': None,
                             'gain_nsb_dependency': options.gain_nsb_dependency,
-                            'time_signal': options.time_signal}
+                            'time_signal': None,
+                            'jitter_signal': None}
 
     simulation_parameters = {'start_time': options.photon_times[0],
                              'end_time': options.photon_times[1],
@@ -38,10 +39,11 @@ def create_dataset(options):
                              'sigma_1': camera_parameters.gain_smearing['value'],
                              'gain': camera_parameters.gain['value'],
                              'baseline': camera_parameters.baseline['value'],
-                             'dark_rate' : camera_parameters.dark_count_rate['value'],
+                             'dark_rate': camera_parameters.dark_count_rate['value'],
                              'gain_nsb_dependency': options.gain_nsb_dependency,
-                             'dc_dac' : options.dc_level,
-                             'time_signal': options.time_signal}
+                             'dc_dac': options.dc_level,
+                             'time_signal': camera_parameters.time_signal['value'],
+                             'jitter_signal': camera_parameters.time_jitter['value']}
 
     for file_index in options.file_list:
 
@@ -76,6 +78,8 @@ def create_dataset(options):
                     generator_parameters['gain'] = camera_parameters.gain['value'][pixel_id]
                     generator_parameters['baseline'] = camera_parameters.baseline['value'][pixel_id]
                     generator_parameters['nsb_rate'] = (nsb + camera_parameters.dark_count_rate['value'][pixel_id]) / 1E3
+                    generator_parameters['time_signal'] = camera_parameters.time_signal['value'][pixel_id] * (generator_parameters['end_time'] - generator_parameters['start_time'])
+                    generator_parameters['jitter_signal'] = camera_parameters.time_jitter['value'][pixel_id]
 
                     generator.append(Trace_Generator(**generator_parameters))
 

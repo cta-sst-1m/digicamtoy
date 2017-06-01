@@ -2,11 +2,11 @@ import h5py
 import matplotlib.pyplot as plt
 import numpy as np
 
-def gain_drop(nsb_rate, cell_capacitance, bias_resistance):
 
-    return 1. / (1. + nsb_rate * cell_capacitance * bias_resistance * 1E9)
+def main():
 
-if __name__ == '__main__':
+    def gain_drop(nsb_rate, cell_capacitance, bias_resistance):
+        return 1. / (1. + nsb_rate * cell_capacitance * bias_resistance * 1E9)
 
     data_with_gain_drop = h5py.File('test/data/nsb_scan_1pixel_0_gain_drop_true.hdf5', 'r')
     data_without_gain_drop = h5py.File('test/data/nsb_scan_1pixel_0_gain_drop_false.hdf5', 'r')
@@ -46,7 +46,11 @@ if __name__ == '__main__':
     plt.legend()
     plt.show()
 
+    return
 
+if __name__ == '__main__':
+
+    main()
 
 
 

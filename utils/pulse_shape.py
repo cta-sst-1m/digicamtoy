@@ -4,6 +4,7 @@ import scipy.interpolate
 
 filename_pulse_shape = 'utils/pulse_SST-1M_AfterPreampLowGain.dat'  # pulse shape template file
 
+__all__ = ['get_pulse_shape']
 
 
 def compute_normalized_pulse_shape_area():
@@ -56,6 +57,12 @@ def return_interpolant():
     time_steps, amplitudes = compute_normalized_pulse_shape()
 
     return scipy.interpolate.interp1d(time_steps, amplitudes, kind='cubic', bounds_error=False, fill_value=0., assume_sorted=True)
+
+def get_pulse_shape(time, t_0, amplitude, baseline=0):
+
+    f = return_interpolant()
+
+    return amplitude * f(time - t_0) + baseline
 
 
 if __name__ == '__main__':

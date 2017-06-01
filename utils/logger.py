@@ -1,5 +1,4 @@
 import logging,sys
-from tqdm import tqdm
 import io
 
 __all__ = ['initialise_logger']
