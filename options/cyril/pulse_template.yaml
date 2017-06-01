@@ -4,7 +4,7 @@ verbose : True
 output_directory : /data/datasets/monte_carlo/digicam_toy/pulse_template/
 file_basename : dark_with_signal_%d.hdf5
 file_list : [0]
-events_per_level : 10000 # number of events per signal per nsb
+events_per_level : 1000 # number of events per signal per nsb
 
 # DigiCam config
 photon_times : [0, 364, 4] # ns
