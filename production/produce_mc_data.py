@@ -57,7 +57,7 @@ def create_dataset(options):
 
             log.error('File %s already exists' % options.file_basename % file_index)
             exit()
-            
+
         camera_parameters_group = hdf5.create_group('simulation_parameters')
 
         for key, val in simulation_parameters.items():
@@ -90,8 +90,6 @@ def create_dataset(options):
                     generator_parameters['jitter_signal'] = camera_parameters.time_jitter['value'][pixel_id]
 
                     generator.append(Trace_Generator(**generator_parameters))
-
-
 
                 log.debug('--|> Trace Generators created for dc_level (Dark count included) : %d and ac_level %d\n' % (i, j))
                 event_number = 0
