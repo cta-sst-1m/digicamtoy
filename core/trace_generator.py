@@ -30,6 +30,7 @@ class Trace_Generator:
         self.adc_count = np.zeros(len(self.sampling_bins))  # FADC values
         self.n_signal_photon = n_signal_photon  # number of Cherenkov photons
         self.time_signal = time_signal
+        self.cherenkov_time = np.inf
         self.jitter_signal = jitter_signal
         self.sig_poisson = sig_poisson  # is the number of signal photons distributed as a poisson?
 

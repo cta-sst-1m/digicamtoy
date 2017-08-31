@@ -3,15 +3,15 @@ log_file_basename : log
 verbose : True
 
 output_directory : /home/alispach/data/digicam_commissioning/trigger/mc/
-file_basename : sandbox_%d.hdf5
-file_list : [1]
-events_per_level : 1 # number of events per signal per nsb
+file_basename : time_resolution_1_pixel_%d.hdf5
+file_list : [0, 1]
+events_per_level : 5000 # number of events per signal per nsb
 
 # DigiCam config
 photon_times : [0, 368, 4]
 nsb_rate : [0, 3] # nsb rates [MHz]
 dc_level : [0, 1]
-signal : [0, 1, 2] # signal in p.e.
+signal : [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16, 18, 20] # signal in p.e.
 poisson_signal : False # generate signal according to a Poisson distribution
 
 # PDP params

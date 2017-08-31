@@ -88,14 +88,17 @@ def create_dataset(options):
                 log.debug('--|> Trace Generators created for dc_level (Dark count included) : %d and ac_level %d\n' % (i, j))
                 event_number = 0
                 data = []
+                data_time = []
                 while event_number < options.events_per_level:
 
                     try:
                         event = []
+                        event_time = []
                         for pixel_id in range(camera_parameters.n_pixels):
 
                             generator[pixel_id].next()
                             event.append(generator[pixel_id].adc_count)
+                            event_time.append(generator[pixel_id].cherenkov_time)
 
                         event_number += 1
 
@@ -104,11 +107,15 @@ def create_dataset(options):
                         break
                     else:
                         data.append(event)
+                        data_time.append(event_time)
                         progress_bar.update(1)
 
                 data = np.array(data)
                 data = np.rollaxis(data, 0, len(data.shape))
-                level_group.create_dataset('data', data=data, dtype=np.uint8)
+                data_time = np.array(data_time)
+
+                level_group.create_dataset('data', data=data, dtype=np.uint16)
+                level_group.create_dataset('time', data=data_time, dtype=np.float32)
                 hdf5.flush()
         hdf5.close()
         log.info('--|> File %s.hdf5 saved to %s\n' % (options.file_basename % file_index, options.output_directory))

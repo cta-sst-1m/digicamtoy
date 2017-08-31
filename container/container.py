@@ -140,6 +140,10 @@ if __name__ == '__main__':
     pixel_container.initialize_simple_camera(dark_count_rate=0.)
     pixel_container.save(filename='simple_pixel.pk')
 
+    pixel_container.time_signal['value'] = np.ones(1) * 0.3
+    pixel_container.time_jitter['value'] = np.ones(1) * 4. / np.sqrt(12.)
+    pixel_container.save(filename='simple_pixel_constant_jitter.pk')
+
     data = np.load('/home/alispach/data/digicam_commissioning/dc_calibration/dc_calibration.npz')
     fit_parameters = data['fit_parameters']
 
