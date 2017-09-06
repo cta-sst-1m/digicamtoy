@@ -9,5 +9,6 @@ setup(
     license='GNU GPLv3',
     author='Cyril Alispach',
     author_email='cyril.alispach@gmail.com',
-    description='A Monte Carlo package of the SST-1m Camera'
+    description='A Monte Carlo package of the SST-1m Camera',
+    package_data={'digicamtoy.utils': ['pulse_SST-1M_AfterPreampLowGain.dat']}
 )
