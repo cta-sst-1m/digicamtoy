@@ -1,7 +1,11 @@
-from yaml import load
+import logging
+import os
+import sys
 from optparse import OptionParser
-import sys, logging, os
-from utils import logger
+
+from yaml import load
+
+from digicamtoy.utils import logger
 
 if __name__ == '__main__':
 

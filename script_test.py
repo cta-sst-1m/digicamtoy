@@ -1,4 +1,4 @@
-from test import test_time_signal, test_baseline_shift
+from digicamtoy.test import test_time_signal
 
 if __name__ == '__main__':
 
