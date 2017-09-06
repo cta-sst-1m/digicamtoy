@@ -2,7 +2,6 @@ import logging
 import os
 import sys
 from optparse import OptionParser
-
 from yaml import load
 
 from digicamtoy.utils import logger
