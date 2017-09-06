@@ -1,0 +1,19 @@
+production_module : produce_mc_data
+verbose : True
+
+output_directory : test/data/
+file_basename : time_signal_%d.hdf5
+file_list : [1]
+events_per_level : 10 # number of events per signal per nsb
+
+# DigiCam config
+photon_times : [0, 200, 4] # ns
+time_signal : 50.84
+dc_level : [0]
+nsb_rate : [3] # nsb rates [MHz]
+signal : [10] # signal in p.e.
+poisson_signal : True # generate signal according to a Poisson distribution
+
+# PDP params
+calibration_filename : container/simple_pixel.pk
+gain_nsb_dependency : False
