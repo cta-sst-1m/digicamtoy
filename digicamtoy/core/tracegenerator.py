@@ -7,11 +7,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from digicamtoy.utils.pulse_shape import return_interpolant
+import digicamtoy
 
 interpolant = return_interpolant()
 
 
-class Trace_Generator:
+class TraceGenerator:
 
     def __init__(self, start_time=-100., end_time=100., sampling_time=4., nsb_rate=660 * 1E6 * 1E-9,
                  mean_crosstalk_production=0.08, debug=False, gain_nsb_dependency=False, n_signal_photon=0.,
@@ -36,8 +37,8 @@ class Trace_Generator:
         self.cherenkov_time = np.inf
         self.jitter_signal = jitter_signal
         self.sig_poisson = sig_poisson  # is the number of signal photons distributed as a poisson?
-
-        self.filename_pulse_shape = 'utils/pulse_SST-1M_AfterPreampLowGain.dat'  # pulse shape template file
+        dir = os.path.dirname(digicamtoy.__file__)
+        self.filename_pulse_shape = dir + '/utils/pulse_SST-1M_AfterPreampLowGain.dat'  # pulse shape template file
         self.pe_to_adc = gain
         self.sigma_e = sigma_e / gain  # electronic spread in analog to digital conversion
         self.baseline = int(baseline)
@@ -416,9 +417,9 @@ if __name__ == '__main__':
             print('file named : ' + filename + ' already exists')
             sys.exit("Error message")
 
-    trace_object = Trace_Generator(start_time, end_time, sampling_time, nsb_rate, mean_crosstalk_production, debug,
-                                   False,
-                                   n_cherenkov_photon)
+    trace_object = TraceGenerator(start_time, end_time, sampling_time, nsb_rate, mean_crosstalk_production, debug,
+                                  False,
+                                  n_cherenkov_photon)
     nsb_rate = np.logspace(1, 2.5, N_forced_trigger) * 1E-3
     nsb_rate = np.array([2, 200, 660]) * 1E-3
     # fig = plt.figure()

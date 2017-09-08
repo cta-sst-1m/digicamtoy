@@ -1,5 +1,5 @@
 from tkinter import *
-from digicamtoy.core import trace_generator
+from digicamtoy.core import tracegenerator
 import inspect
 #from tkinter.ttk import *
 
@@ -46,9 +46,7 @@ class ConfigurationWindow(Frame):
 
 if __name__ == '__main__':
 
-    a =inspect.signature(trace_generator.Trace_Generator.__init__)
-
-
+    a = inspect.signature(tracegenerator.TraceGenerator.__init__)
     window = Tk()
 
     #window.style = Style()
