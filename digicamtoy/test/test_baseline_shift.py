@@ -8,8 +8,8 @@ def main():
     def gain_drop(nsb_rate, cell_capacitance, bias_resistance):
         return 1. / (1. + nsb_rate * cell_capacitance * bias_resistance * 1E9)
 
-    data_with_gain_drop = h5py.File('test/data/nsb_scan_1pixel_0_gain_drop_true.hdf5', 'r')
-    data_without_gain_drop = h5py.File('test/data/nsb_scan_1pixel_0_gain_drop_false.hdf5', 'r')
+    data_with_gain_drop = h5py.File('data/nsb_scan_1pixel_0_gain_drop_true.hdf5', 'r')
+    data_without_gain_drop = h5py.File('data/nsb_scan_1pixel_0_gain_drop_false.hdf5', 'r')
     baseline_fadc = np.array(data_with_gain_drop['simulation_parameters']['baseline'])
 
     nsb = np.array(data_with_gain_drop['simulation_parameters']['nsb_rate'])
