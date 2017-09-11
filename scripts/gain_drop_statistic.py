@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.interpolate import interp1d
+from scipy.interpolate import interp1d, splrep, splev, splder
 import matplotlib.pyplot as plt
 from digicamtoy.utils.analytical import gain_drop
 from nsb_baseline import compute_moments_nsb
@@ -7,13 +7,13 @@ from nsb_baseline import compute_moments_nsb
 
 if __name__ == '__main__':
 
-    n_waveforms = np.linspace(4, 100, num=4)
+    n_waveforms = np.linspace(4, 1000, num=5)
     true_values = np.load('true_mean_std_nsb.npz')
     mean_true = true_values['mean']
     std_true = true_values['std']
     nsb_rate = true_values['nsb_rate']
 
-    trials = 100
+    trials = 400
     mean = np.zeros((n_waveforms.shape[0], trials, len(nsb_rate)))
     std = np.zeros((n_waveforms.shape[0], trials, len(nsb_rate)))
 
@@ -21,6 +21,7 @@ if __name__ == '__main__':
 
         for j in range(trials):
 
+            print(i, j)
             out = compute_moments_nsb(n_waveform=n_waveform, nsb_rate=nsb_rate)
             mean[i, j] = out[0]
             std[i, j] = out[2]
@@ -42,7 +43,10 @@ if __name__ == '__main__':
     n_waveforms = data['n_waveforms']
     trials = data['trials']
 
-    std_to_gain_drop = interp1d(std_true, gain_drop(nsb_rate), fill_value='extrapolate')
+    # std_to_gain_drop = interp1d(std_true, gain_drop(nsb_rate), fill_value='extrapolate')
+    spline = splrep(std_true, gain_drop(nsb_rate))
+    std_to_gain_drop = lambda x: splev(x, spline)
+    std_error_to_gain_drop_error = lambda x: np.abs(splev(x, splder(spline, n=1)))
 
     fig = plt.figure()
     axis = fig.add_subplot(111)
@@ -52,10 +56,10 @@ if __name__ == '__main__':
     for i, n_waveform in enumerate(n_waveforms):
 
         axis.fill_between(nsb_rate * 1E3, mean_mean[i] - mean_error[i], mean_mean[i] + mean_error[i], alpha=0.3,
-                          label='$N_{bins} =$ %d' % (n_waveform *50))
+                          label='$N_{bins} =$ %d' % (n_waveform * 50))
         axis.plot(nsb_rate * 1E3, mean_mean[i], alpha=0.3)
         axis_1.fill_between(nsb_rate * 1E3, std_mean[i] - std_error[i], std_mean[i] + std_error[i], alpha=0.3,
-                            label='$N_{bins} =$ %d' % (n_waveform *50))
+                            label='$N_{bins} =$ %d' % (n_waveform * 50))
         axis_1.plot(nsb_rate * 1E3, std_mean[i], alpha=0.3)
 
         """
@@ -84,17 +88,42 @@ if __name__ == '__main__':
 
     fig = plt.figure()
     axis = fig.add_subplot(111)
-    for i, n_waveform in enumerate(n_waveforms):
 
+    fig_1 = plt.figure()
+    axis_1 = fig_1.add_subplot(111)
+
+    for i, n_waveform in enumerate(n_waveforms):
         axis.fill_between(std_mean[i], std_to_gain_drop((std_mean - std_error)[i]),
                           std_to_gain_drop((std_mean + std_error)[i]), alpha=0.3,
-                          label='$N_{bins} =$ %d' % (n_waveform * 50))
+                          label='$N_{bins} =$ %d' % (n_waveform * 50), interpolate=True)
         axis.plot(std_mean[i], std_to_gain_drop(std_mean[i]), alpha=0.3)
 
+        axis_1.plot(std_true, std_error_to_gain_drop_error(std_true) * std_error[i] / gain_drop(nsb_rate) * 100,
+                    label='$N_{bins} =$ %d' % (n_waveform * 50))
 
     # axis.set_xscale('log')
     axis.set_xlabel('STD [LSB]')
     axis.set_ylabel('gain drop []')
+    axis.legend()
+
+    axis_1.set_xlabel('STD [LSB]')
+    axis_1.set_ylabel('gain drop error [$\%$]')
+    axis_1.legend()
+
+    fig = plt.figure()
+    axis = fig.add_subplot(111)
+    for j, nsb in enumerate(nsb_rate):
+
+        if j % 4 == 0:
+
+            axis.plot(n_waveforms * 50, std_error[..., j]/std_mean[..., j],
+                      label='$f_{nsb} = $ %0.1f [MHz]' % (nsb * 1E3), linestyle='None', marker='o')
+
+        # axis.plot(std_mean[i], std_to_gain_drop(std_mean[i]), alpha=0.3)
+
+    # axis.set_xscale('log')
+    axis.set_xlabel('$N_{bins}$')
+    axis.set_ylabel('STD relative error []')
     axis.legend()
 
     plt.show()
