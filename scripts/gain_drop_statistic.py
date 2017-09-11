@@ -11,7 +11,7 @@ if __name__ == '__main__':
     true_values = np.load('true_mean_std_nsb.npz')
     mean_true = true_values['mean']
     std_true = true_values['std']
-    nsb_rate = np.logspace(0, 3, num=30) * 1E6 * 1E-9 # true_values['nsb_rate']
+    nsb_rate = true_values['nsb_rate']
 
     trials = 100
     mean = np.zeros((n_waveforms.shape[0], trials, len(nsb_rate)))
@@ -30,7 +30,8 @@ if __name__ == '__main__':
     std_mean = np.mean(std, axis=1)
     std_error = np.std(std, axis=1)
 
-    np.savez('measured_mean_std_nsb.npz',  mean=mean_mean, mean_error=mean_error, std=std_mean, std_error=std_error, nsb_rate=nsb_rate, n_waveforms=n_waveforms, trials=trials)
+    np.savez('measured_mean_std_nsb.npz',  mean=mean_mean, mean_error=mean_error, std=std_mean, std_error=std_error,
+             nsb_rate=nsb_rate, n_waveforms=n_waveforms, trials=trials)
 
     data = np.load('measured_mean_std_nsb.npz')
     mean_mean = data['mean']
@@ -50,9 +51,11 @@ if __name__ == '__main__':
 
     for i, n_waveform in enumerate(n_waveforms):
 
-        axis.fill_between(nsb_rate * 1E3, mean_mean[i] - mean_error[i], mean_mean[i] + mean_error[i], alpha=0.3, label='$N_{bins} =$ %d' % (n_waveform *50))
+        axis.fill_between(nsb_rate * 1E3, mean_mean[i] - mean_error[i], mean_mean[i] + mean_error[i], alpha=0.3,
+                          label='$N_{bins} =$ %d' % (n_waveform *50))
         axis.plot(nsb_rate * 1E3, mean_mean[i], alpha=0.3)
-        axis_1.fill_between(nsb_rate * 1E3, std_mean[i] - std_error[i], std_mean[i] + std_error[i], alpha=0.3, label='$N_{bins} =$ %d' % (n_waveform *50))
+        axis_1.fill_between(nsb_rate * 1E3, std_mean[i] - std_error[i], std_mean[i] + std_error[i], alpha=0.3,
+                            label='$N_{bins} =$ %d' % (n_waveform *50))
         axis_1.plot(nsb_rate * 1E3, std_mean[i], alpha=0.3)
 
         """
@@ -83,8 +86,9 @@ if __name__ == '__main__':
     axis = fig.add_subplot(111)
     for i, n_waveform in enumerate(n_waveforms):
 
-        axis.fill_between(std_mean[i], std_to_gain_drop((std_mean - std_error)[i]), std_to_gain_drop((std_mean + std_error)[i]), alpha=0.3,
-                      label='$N_{bins} =$ %d' % (n_waveform * 50))
+        axis.fill_between(std_mean[i], std_to_gain_drop((std_mean - std_error)[i]),
+                          std_to_gain_drop((std_mean + std_error)[i]), alpha=0.3,
+                          label='$N_{bins} =$ %d' % (n_waveform * 50))
         axis.plot(std_mean[i], std_to_gain_drop(std_mean[i]), alpha=0.3)
 
 

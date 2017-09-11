@@ -10,5 +10,6 @@ setup(
     author='Cyril Alispach',
     author_email='cyril.alispach@gmail.com',
     description='A Monte Carlo package of the SST-1m Camera',
-    package_data={'digicamtoy.utils': ['pulse_SST-1M_AfterPreampLowGain.dat']}
+    package_data={'digicamtoy.utils': ['pulse_SST-1M_AfterPreampLowGain.dat']},
+    requires=['numpy', 'matplotlib', 'scipy']
 )
