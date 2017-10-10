@@ -34,8 +34,8 @@ def compute_moments_nsb(n_waveform, nsb_rate):
 
 if __name__ == '__main__':
 
-    nsb_rate = np.logspace(0, 3, num=30) * 1E6 * 1E-9
-    mean_true, mean_error_true, std_true, std_error_true = compute_moments_nsb(n_waveform=10000, nsb_rate=nsb_rate)
+    nsb_rate = np.logspace(0, np.log10(50000), num=30) * 1E6 * 1E-9
+    mean_true, mean_error_true, std_true, std_error_true = compute_moments_nsb(n_waveform=1000, nsb_rate=nsb_rate)
     np.savez('true_mean_std_nsb.npz', mean=mean_true, mean_error=mean_error_true, std=std_true, std_error=std_error_true, nsb_rate=nsb_rate)
     data = np.load('true_mean_std_nsb.npz')
     mean_true = data['mean']
@@ -43,6 +43,10 @@ if __name__ == '__main__':
     std_true = data['std']
     std_error_true = data['std_error']
     nsb_rate = data['nsb_rate']
+
+    print(nsb_rate)
+    print(std_true)
+    print(mean_true)
 
     fig = plt.figure()
     axis = fig.add_subplot(111)
