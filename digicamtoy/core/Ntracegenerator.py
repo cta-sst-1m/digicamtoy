@@ -1,10 +1,7 @@
 import os.path
 import numpy as np
 from scipy.interpolate import interp1d
-from digicamtoy.utils.pulse_shape import return_interpolant
 import digicamtoy
-
-interpolant = return_interpolant()
 
 
 class NTraceGenerator:
@@ -13,7 +10,9 @@ class NTraceGenerator:
                  crosstalk=np.ones(1296) * 0.08, gain_nsb_dependency=True, n_photon=np.zeros(1296), poisson=True,
                  sigma_e=np.ones(1296) * 0.8, sigma_1=np.ones(1296) * 0.8, gain=np.ones(1296) * 5.8,
                  baseline=np.ones(1296) * 200., time_signal=np.ones(1296) * 20, jitter=np.zeros(1296),
-                 pulse_shape_file='/utils/pulse_SST-1M_AfterPreampLowGain.dat'):
+                 pulse_shape_file='/utils/pulse_SST-1M_AfterPreampLowGain.dat', seed=0):
+
+        np.random.seed(seed)
 
         self.artificial_backward_time = 40
         self.time_start = time_start - self.artificial_backward_time
@@ -33,18 +32,25 @@ class NTraceGenerator:
         self.gain_nsb_dependency = gain_nsb_dependency
         self.cell_capacitance = 85. * 1E-15
         self.bias_resistance = 10. * 1E3
-        self.gain = gain / (1. + nsb_rate * self.cell_capacitance * self.bias_resistance * 1E9 * self.gain_nsb_dependency)
+        self.gain = gain / (1. + nsb_rate * self.cell_capacitance * self.bias_resistance * 1E9 *
+                            self.gain_nsb_dependency)
         self.baseline = baseline.astype(int)
         self.sigma_1 = sigma_1 / self.gain
 
         time_steps, amplitudes = np.loadtxt(self.filename_pulse_shape, unpack=True, skiprows=1)
         amplitudes = amplitudes / min(amplitudes)
-        self.pulse_template = interp1d(time_steps, amplitudes, kind='cubic', bounds_error=False, fill_value=0., assume_sorted=True)
-
-
-        # TODO change seed by passing the np.random.RandomState() instead
+        self.pulse_template = interp1d(time_steps, amplitudes, kind='cubic', bounds_error=False,
+                                       fill_value=0., assume_sorted=True)
 
         self.count = -1
+
+        self.cherenkov_time = np.zeros(self.n_pixels)
+        self.cherenkov_photon = np.zeros(self.n_pixels, dtype=np.int)
+        self.nsb_time = np.zeros((self.n_pixels, 1))
+        self.nsb_photon = np.zeros((self.n_pixels, 1))
+        self.mask = np.zeros(self.nsb_photon.shape)
+        self.sampling_bins = np.arange(self.time_start, self.time_end, self.time_sampling)
+        self.adc_count = np.zeros((self.n_pixels, self.sampling_bins.shape[0]))
         self.reset()
 
     def __str__(self):
@@ -52,11 +58,13 @@ class NTraceGenerator:
         return ''.join('{}{}'.format(key, val) for key, val in sorted(self.__dict__.items()))
 
     def __iter__(self):
+
         return self
 
     def __next__(self):
 
         self.next()
+
         return self
 
     def get_pulse_shape(self, time, t_0=0, baseline=0, amplitude=1):
@@ -113,7 +121,8 @@ class NTraceGenerator:
 
         photon_number = np.random.poisson(lam=(self.time_end - self.time_start) * self.nsb_rate)
         max_photon = np.max(photon_number)
-        self.nsb_time = np.random.uniform(size=(self.n_pixels, max_photon)) * (self.time_end - self.time_start) + self.time_start
+        self.nsb_time = np.random.uniform(size=(self.n_pixels, max_photon)) * \
+                        (self.time_end - self.time_start) + self.time_start
         self.mask = np.arange(max_photon)
         self.mask = np.tile(self.mask, (self.n_pixels, 1))
         self.mask = (self.mask < photon_number[..., np.newaxis])
@@ -198,7 +207,12 @@ class NTraceGenerator:
 if __name__ == '__main__':
 
     import matplotlib.pyplot as plt
-    toy_iterator = NTraceGenerator(n_photon=np.ones(1296) * 0, nsb_rate=np.ones(1296) * 0.003)
+    toy_iterator = NTraceGenerator(time_start=0, time_end=200, time_sampling=4, n_pixels=1296, nsb_rate=np.ones(1296) * 0.6,
+                 crosstalk=np.ones(1296) * 0.08, gain_nsb_dependency=True, n_photon=np.zeros(1296), poisson=True,
+                 sigma_e=np.ones(1296) * 0.8, sigma_1=np.ones(1296) * 0.8, gain=np.ones(1296) * 5.8,
+                 baseline=np.ones(1296) * 200., time_signal=np.ones(1296) * 20, jitter=np.zeros(1296),
+                 pulse_shape_file='/utils/pulse_SST-1M_AfterPreampLowGain.dat', seed=None)
+
     plt.figure()
     for i, toy in enumerate(toy_iterator):
 
