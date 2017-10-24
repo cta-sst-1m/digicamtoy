@@ -3,15 +3,17 @@ verbose : True
 
 output_directory : /home/alispach/data/digicam_commissioning/trigger/mc/
 file_basename : nsb_full_camera_%d.hdf5
-file_list : [0]
+file_list : [105]
 events_per_level : 1000 # number of events per signal per nsb
 
 # DigiCam config
-photon_times : [0, 200, 4] # ns
-nsb_rate : [0, 3, 40, 80, 125, 660] # nsb rates [MHz]
+photon_times : [0, 196, 4] # ns
+nsb_rate : [1150] # nsb rates [MHz]
+nsb_rate_std : [190] # nsb rate std over camera
+dc_level : [0]
 signal : [0] # signal in p.e.
 poisson_signal : True # generate signal according to a Poisson distribution
 
 # PDP params
-calibration_filename : /home/alispach/Documents/PhD/ctasoft/digicamtoy/container/simple_camera.pk
+calibration_filename : /home/alispach/Documents/PhD/ctasoft/digicamtoy/digicamtoy/container/standard_camera.pk
 gain_nsb_dependency : True

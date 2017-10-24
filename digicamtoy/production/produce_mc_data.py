@@ -5,20 +5,20 @@ import h5py
 import numpy as np
 from tqdm import tqdm
 
-from digicamtoy.container import Calibration_Container
-from digicamtoy.core import Trace_Generator
+from digicamtoy.container.container import CalibrationContainer
+from digicamtoy.core.tracegenerator import TraceGenerator
 
 
 def create_dataset(options):
 
-    camera_parameters = Calibration_Container(filename=options.calibration_filename)
+    camera_parameters = CalibrationContainer(filename=options.calibration_filename)
     log = logging.getLogger(sys.modules['__main__'].__name__ + '.' + __name__)
     log.debug('Reading calibration container %s \n' % options.calibration_filename)
     progress_bar = tqdm(total=len(options.file_list) * len(options.dc_level) * len(options.signal) * options.events_per_level)
 
-    generator_parameters = {'start_time': options.photon_times[0],
-                            'end_time': options.photon_times[1],
-                            'sampling_time': options.photon_times[2],
+    generator_parameters = {'time_start': options.photon_times[0],
+                            'time_end': options.photon_times[1],
+                            'time_sampling': options.photon_times[2],
                             'nsb_rate': None,
                             'mean_crosstalk_production': None,
                             'n_signal_photon': None,
@@ -31,9 +31,9 @@ def create_dataset(options):
                             'time_signal': None,
                             'jitter_signal': None}
 
-    simulation_parameters = {'start_time': options.photon_times[0],
-                             'end_time': options.photon_times[1],
-                             'sampling_time': options.photon_times[2],
+    simulation_parameters = {'time_start': options.photon_times[0],
+                             'time_end': options.photon_times[1],
+                             'time_sampling': options.photon_times[2],
                              'nsb_rate': np.zeros((camera_parameters.n_pixels, len(options.dc_level))),
                              'mean_crosstalk_production': camera_parameters.crosstalk['value'],
                              'n_signal_photon': options.signal,
@@ -70,8 +70,13 @@ def create_dataset(options):
 
                     if not hasattr(options, 'nsb_rate'):
                         nsb = dc_led_fit_function(dc_level, a=camera_parameters.dc_led['value'][pixel_id][0], b=camera_parameters.dc_led['value'][pixel_id][1], c=camera_parameters.dc_led['value'][pixel_id][2]) * 1E3
+                        print('hello')
                     else:
                         nsb = options.nsb_rate[i]
+
+                    if hasattr(options, 'nsb_rate_std'):
+
+                        nsb = np.random.normal(options.nsb_rate[i], options.nsb_rate_std[i])
 
                     hdf5['simulation_parameters']['nsb_rate'][pixel_id, i] = nsb
 
@@ -81,12 +86,10 @@ def create_dataset(options):
                     generator_parameters['gain'] = camera_parameters.gain['value'][pixel_id]
                     generator_parameters['baseline'] = camera_parameters.baseline['value'][pixel_id]
                     generator_parameters['nsb_rate'] = (nsb + camera_parameters.dark_count_rate['value'][pixel_id]) / 1E3
-                    generator_parameters['time_signal'] = camera_parameters.time_signal['value'][pixel_id] * (generator_parameters['end_time'] - generator_parameters['start_time'])
+                    generator_parameters['time_signal'] = camera_parameters.time_signal['value'][pixel_id] * (generator_parameters['time_end'] - generator_parameters['time_start'])
                     generator_parameters['jitter_signal'] = camera_parameters.time_jitter['value'][pixel_id]
 
-                    generator.append(Trace_Generator(**generator_parameters))
-
-
+                    generator.append(TraceGenerator(**generator_parameters))
 
                 log.debug('--|> Trace Generators created for dc_level (Dark count included) : %d and ac_level %d\n' % (i, j))
                 event_number = 0
@@ -111,12 +114,13 @@ def create_dataset(options):
 
                 data = np.array(data)
                 data = np.rollaxis(data, 0, len(data.shape))
-                level_group.create_dataset('data', data=data, dtype=np.uint8)
+                level_group.create_dataset('data', data=data, dtype=np.uint16)
                 hdf5.flush()
         hdf5.close()
         log.info('--|> File %s.hdf5 saved to %s\n' % (options.file_basename % file_index, options.output_directory))
 
     return
+
 
 def dc_led_fit_function(dc_level, a, b, c):
 

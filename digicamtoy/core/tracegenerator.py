@@ -113,7 +113,7 @@ class TraceGenerator:
                             label='%d [MHz]' % (self.nsb_rate * 1E3))  # , color='b')
             # plt.ylabel(r'$ADC count$')
             # plt.xlabel(r'$t$ [ns]')
-            # plt.xlim(np.array([self.start_time + self.artificial_backward_time, self.end_time]))
+            # plt.xlim(np.array([self.time_start + self.artificial_backward_time, self.time_end]))
             # ~ plt.ylim([0, 150])
             # plt.legend()
 
@@ -145,7 +145,7 @@ class TraceGenerator:
             jitter = 0.
 
         self.photon_arrival_time[
-            0] = self.time_signal + jitter  # -1.54 #np.random.uniform(-self.sampling_time, self.sampling_time) # + np.random.normal(0, self.sampling_time/100., size=1)
+            0] = self.time_signal + jitter  # -1.54 #np.random.uniform(-self.time_sampling, self.time_sampling) # + np.random.normal(0, self.time_sampling/100., size=1)
         self.cherenkov_time = self.photon_arrival_time[0]
         self.photon[0] = np.random.poisson(self.n_signal_photon) if self.sig_poisson else self.n_signal_photon
 

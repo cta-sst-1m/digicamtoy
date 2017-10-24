@@ -3,7 +3,7 @@ import pickle
 import datetime
 from scipy.interpolate import splev, splint, splrep
 
-class Calibration_Container():
+class CalibrationContainer():
 
     """
     a container with all calibration parameters for SST-1M camera
@@ -110,7 +110,7 @@ class Calibration_Container():
 if __name__ == '__main__':
 
 
-    camera_container = Calibration_Container()
+    camera_container = CalibrationContainer()
 
     camera_container.initialize_standard_camera()
     camera_container.save(filename='standard_camera.pk')

@@ -52,7 +52,7 @@ if __name__ == '__main__':
     # load the analysis module
     logger.initialise_logger(options)
     print('--------------------------', options.production_module)
-    production_module = __import__('production.%s' % options.production_module,\
+    production_module = __import__('digicamtoy.production.%s' % options.production_module,\
                                      locals=None, \
                                      globals=None, \
                                      fromlist=[None], \

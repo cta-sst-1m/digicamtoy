@@ -19,7 +19,7 @@ def main():
 
     n_traces = traces_10.shape[-1]
     n_bins = traces_10.shape[1]
-    x = np.arange(0, n_bins) * time_signal_10['simulation_parameters']['sampling_time']
+    x = np.arange(0, n_bins) * time_signal_10['simulation_parameters']['time_sampling']
     x_fit = np.linspace(0, n_bins*4, 1000)
 
     for i in range(3):

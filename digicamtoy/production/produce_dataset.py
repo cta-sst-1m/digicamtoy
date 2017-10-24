@@ -14,8 +14,8 @@ def create_dataset(options):
     log = logging.getLogger(sys.modules['__main__'].__name__ + '.' + __name__)
     pbar = tqdm(total=len(options.seed) * len(options.nsb_rate) * len(options.signal) * options.events_per_level)
 
-    generator_parameters = {'start_time': options.photon_times[0], 'end_time': options.photon_times[1],
-                 'sampling_time': options.photon_times[2], 'nsb_rate': options.nsb_rate[0],
+    generator_parameters = {'time_start': options.photon_times[0], 'time_end': options.photon_times[1],
+                 'time_sampling': options.photon_times[2], 'nsb_rate': options.nsb_rate[0],
                  'mean_crosstalk_production': options.crosstalk,
                  'n_signal_photon': options.signal[0], 'sig_poisson': options.poisson_signal,
                  'sigma_e': options.sigma_e,

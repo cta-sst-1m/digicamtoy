@@ -16,9 +16,9 @@ def create_dataset(options):
     log.debug('Reading calibration container %s \n' % options.calibration_filename)
     progress_bar = tqdm(total=len(options.file_list) * len(options.dc_level) * len(options.signal) * options.events_per_level)
 
-    generator_parameters = {'start_time': options.photon_times[0],
-                            'end_time': options.photon_times[1],
-                            'sampling_time': options.photon_times[2],
+    generator_parameters = {'time_start': options.photon_times[0],
+                            'time_end': options.photon_times[1],
+                            'time_sampling': options.photon_times[2],
                             'nsb_rate': None,
                             'mean_crosstalk_production': None,
                             'n_signal_photon': None,
@@ -31,9 +31,9 @@ def create_dataset(options):
                             'time_signal': None,
                             'jitter_signal': None}
 
-    simulation_parameters = {'start_time': options.photon_times[0],
-                             'end_time': options.photon_times[1],
-                             'sampling_time': options.photon_times[2],
+    simulation_parameters = {'time_start': options.photon_times[0],
+                             'time_end': options.photon_times[1],
+                             'time_sampling': options.photon_times[2],
                              'nsb_rate': np.zeros((camera_parameters.n_pixels, len(options.dc_level))),
                              'mean_crosstalk_production': camera_parameters.crosstalk['value'],
                              'n_signal_photon': options.signal,
@@ -81,7 +81,7 @@ def create_dataset(options):
                     generator_parameters['gain'] = camera_parameters.gain['value'][pixel_id]
                     generator_parameters['baseline'] = camera_parameters.baseline['value'][pixel_id]
                     generator_parameters['nsb_rate'] = (nsb + camera_parameters.dark_count_rate['value'][pixel_id]) / 1E3
-                    generator_parameters['time_signal'] = camera_parameters.time_signal['value'][pixel_id] * (generator_parameters['end_time'] - generator_parameters['start_time'])
+                    generator_parameters['time_signal'] = camera_parameters.time_signal['value'][pixel_id] * (generator_parameters['time_end'] - generator_parameters['time_start'])
                     generator_parameters['jitter_signal'] = camera_parameters.time_jitter['value'][pixel_id]
 
                     generator.append(Trace_Generator(**generator_parameters))

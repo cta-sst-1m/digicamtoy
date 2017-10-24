@@ -35,9 +35,9 @@ def hdf5_mc_event_source(url, events_per_dc_level, events_per_ac_level, dc_start
             data.r0.tel[telescope_id].pixel_flags = np.ones(data.inst.num_pixels[telescope_id])
             data.r0.tel[telescope_id].local_camera_clock = 0
             # data.r0.tel[telescope_id].event_type = 'MC : DigiCamToy'
-            end_time = hdf5['simulation_parameters']['end_time'][()]
-            start_time = hdf5['simulation_parameters']['start_time'][()]
-            sampling_time = hdf5['simulation_parameters']['sampling_time'][()]
+            end_time = hdf5['simulation_parameters']['time_end'][()]
+            start_time = hdf5['simulation_parameters']['time_start'][()]
+            sampling_time = hdf5['simulation_parameters']['time_sampling'][()]
 
             data.r0.tel[telescope_id].num_samples = (start_time - end_time) // sampling_time + 1
 
