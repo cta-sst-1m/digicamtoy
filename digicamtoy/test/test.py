@@ -16,14 +16,14 @@ def test_sampling():
 def test_NTraceGenerator():
 
     n_toy_gen = NTraceGenerator(time_start = 0, time_end=200, time_sampling = 4, n_pixels = 1296,
-                          nsb_rate = np.ones(1296) * 0.005, crosstalk = np.ones(1296) * 0.15, gain_nsb_dependency = True,
-                          n_photon = np.ones(1296) * 100, poisson = True, sigma_e = np.ones(1296) * 0.8,
-                          sigma_1 = np.ones(1296) * 0.8, gain = np.ones(1296) * 5.8,
-                          baseline = np.ones(1296) * 200., time_signal = np.ones(1296) * 20, jitter = np.zeros(1296),
+                          nsb_rate = 0, crosstalk = 0.15, gain_nsb_dependency = True,
+                          n_photon = 0, poisson = True, sigma_e = 0.8,
+                          sigma_1 =  0.8, gain =  5.8,
+                          baseline = 200., time_signal = 20, jitter = 0,
                           pulse_shape_file = '/utils/pulse_SST-1M_AfterPreampLowGain.dat', seed = None)
 
-    toy_gen = TraceGenerator(start_time=0, end_time=196, sampling_time=4, nsb_rate=0.005,
-                 mean_crosstalk_production=0.15, debug=False, gain_nsb_dependency=False, n_signal_photon=100.,
+    toy_gen = TraceGenerator(start_time=0, end_time=196, sampling_time=4, nsb_rate=0.0,
+                 mean_crosstalk_production=0.15, debug=False, gain_nsb_dependency=False, n_signal_photon=0.,
                  sig_poisson=True, sigma_e=0.8, sigma_1=0.8, gain=5.8, baseline=200., time_signal=20, jitter_signal=0,
                  pulse_shape_spline=None)
 

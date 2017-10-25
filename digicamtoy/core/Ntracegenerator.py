@@ -2,17 +2,38 @@ import os.path
 import numpy as np
 from scipy.interpolate import interp1d
 import digicamtoy
+import copy
 
 
 class NTraceGenerator:
 
-    def __init__(self, time_start=0, time_end=200, time_sampling=4, n_pixels=1296, nsb_rate=np.ones(1296) * 0.6,
-                 crosstalk=np.ones(1296) * 0.08, gain_nsb_dependency=True, n_photon=np.zeros(1296), poisson=True,
-                 sigma_e=np.ones(1296) * 0.8, sigma_1=np.ones(1296) * 0.8, gain=np.ones(1296) * 5.8,
-                 baseline=np.ones(1296) * 200., time_signal=np.ones(1296) * 20, jitter=np.zeros(1296),
-                 pulse_shape_file='/utils/pulse_SST-1M_AfterPreampLowGain.dat', seed=0):
+    def __init__(self, time_start=0, time_end=200, time_sampling=4, n_pixels=1296, nsb_rate=0.6,
+                 crosstalk=0.08, gain_nsb=True, n_photon=0, poisson=True,
+                 sigma_e=0.8, sigma_1=0.8, gain=5.8,
+                 baseline=200, time_signal=20, jitter=0,
+                 pulse_shape_file='/utils/pulse_SST-1M_AfterPreampLowGain.dat', seed=0, **kwargs):
 
         np.random.seed(seed)
+
+        # print('unknown keyword arguments : \n',  kwargs)
+        nsb_rate = np.atleast_1d(nsb_rate)
+        nsb_rate = nsb_rate if nsb_rate.shape[0] > 1 else np.array([nsb_rate[0]]*n_pixels)
+        crosstalk = np.atleast_1d(crosstalk)
+        crosstalk = crosstalk if crosstalk.shape[0] > 1 else np.array([crosstalk[0]]*n_pixels)
+        n_photon = np.atleast_1d(n_photon)
+        n_photon = n_photon if n_photon.shape[0] > 1 else np.array([n_photon[0]]*n_pixels)
+        sigma_e = np.atleast_1d(sigma_e)
+        sigma_e = sigma_e if sigma_e.shape[0] > 1 else np.array([sigma_e[0]]*n_pixels)
+        sigma_1 = np.atleast_1d(sigma_1)
+        sigma_1 = sigma_1 if sigma_1.shape[0] > 1 else np.array([sigma_1[0]]*n_pixels)
+        gain = np.atleast_1d(gain)
+        gain = gain if gain.shape[0] > 1 else np.array([gain[0]]*n_pixels)
+        baseline = np.atleast_1d(baseline)
+        baseline = baseline if baseline.shape[0] > 1 else np.array([baseline[0]]*n_pixels)
+        time_signal = np.atleast_1d(time_signal)
+        time_signal = time_signal if time_signal.shape[0] > 1 else np.array([time_signal[0]]*n_pixels)
+        jitter = np.atleast_1d(jitter)
+        jitter = jitter if jitter.shape[0] > 1 else np.array([jitter[0]]*n_pixels)
 
         self.artificial_backward_time = 40
         self.time_start = time_start - self.artificial_backward_time
@@ -29,12 +50,12 @@ class NTraceGenerator:
         self.filename_pulse_shape = directory + pulse_shape_file
         self.gain = gain
         self.sigma_e = sigma_e
-        self.gain_nsb_dependency = gain_nsb_dependency
+        self.gain_nsb = gain_nsb
         self.cell_capacitance = 85. * 1E-15
         self.bias_resistance = 10. * 1E3
         self.gain = gain / (1. + nsb_rate * self.cell_capacitance * self.bias_resistance * 1E9 *
-                            self.gain_nsb_dependency)
-        self.baseline = baseline.astype(int)
+                            self.gain_nsb)
+        self.baseline = baseline
         self.sigma_1 = sigma_1 / self.gain
 
         time_steps, amplitudes = np.loadtxt(self.filename_pulse_shape, unpack=True, skiprows=1)
@@ -43,14 +64,6 @@ class NTraceGenerator:
                                        fill_value=0., assume_sorted=True)
 
         self.count = -1
-
-        self.cherenkov_time = np.zeros(self.n_pixels)
-        self.cherenkov_photon = np.zeros(self.n_pixels, dtype=np.int)
-        self.nsb_time = np.zeros((self.n_pixels, 1))
-        self.nsb_photon = np.zeros((self.n_pixels, 1))
-        self.mask = np.zeros(self.nsb_photon.shape)
-        self.sampling_bins = np.arange(self.time_start, self.time_end, self.time_sampling)
-        self.adc_count = np.zeros((self.n_pixels, self.sampling_bins.shape[0]))
         self.reset()
 
     def __str__(self):
@@ -108,7 +121,7 @@ class NTraceGenerator:
 
     def add_signal_photon(self):
 
-        jitter = self.jitter
+        jitter = copy.copy(self.jitter)
         mask = jitter <= 0
         jitter[mask] = 1
         jitter = np.random.uniform(0, jitter)
@@ -207,11 +220,7 @@ class NTraceGenerator:
 if __name__ == '__main__':
 
     import matplotlib.pyplot as plt
-    toy_iterator = NTraceGenerator(time_start=0, time_end=200, time_sampling=4, n_pixels=1296, nsb_rate=np.ones(1296) * 0.6,
-                 crosstalk=np.ones(1296) * 0.08, gain_nsb_dependency=True, n_photon=np.zeros(1296), poisson=True,
-                 sigma_e=np.ones(1296) * 0.8, sigma_1=np.ones(1296) * 0.8, gain=np.ones(1296) * 5.8,
-                 baseline=np.ones(1296) * 200., time_signal=np.ones(1296) * 20, jitter=np.zeros(1296),
-                 pulse_shape_file='/utils/pulse_SST-1M_AfterPreampLowGain.dat', seed=None)
+    toy_iterator = NTraceGenerator()
 
     plt.figure()
     for i, toy in enumerate(toy_iterator):
@@ -219,4 +228,5 @@ if __name__ == '__main__':
         plt.step(toy.sampling_bins, toy.adc_count[0])
         plt.step(toy.sampling_bins, toy.adc_count[1295])
         print(toy.count)
+        print(toy.nsb_rate)
         plt.show()
