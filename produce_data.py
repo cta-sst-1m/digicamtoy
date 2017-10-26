@@ -8,6 +8,8 @@ import copy
 import logging
 import sys
 import tqdm
+import datetime
+
 
 if __name__ == '__main__':
 
@@ -50,6 +52,10 @@ if __name__ == '__main__':
 
     options_generator = copy.copy(options)
     file_number = 0
+    n_pixels = options_generator.n_pixels
+    n_bins = (options_generator.time_end - options_generator.time_start) // options_generator.time_sampling
+    events_per_level = options_generator.events_per_level
+    data_shape = (n_pixels, n_bins, events_per_level)
 
     for nsb_rate in options.nsb_rate:
 
@@ -67,29 +73,23 @@ if __name__ == '__main__':
                 config.create_dataset(key, data=val)
 
             data = hdf5.create_group('data')
-            adc_count = []
-            cherenkov_time = []
-            cherenkov_photon = []
+            adc_count = np.zeros(data_shape, dtype=np.uint16)
+            cherenkov_time = np.zeros((n_pixels, events_per_level))
+            cherenkov_photon = np.zeros((n_pixels, events_per_level))
 
             for count, trace_generator in zip(range(options.events_per_level), NTraceGenerator(**vars(options_generator))):
 
-                adc_count.append(trace_generator.adc_count)
-                cherenkov_time.append(trace_generator.cherenkov_time)
-                cherenkov_photon.append(trace_generator.cherenkov_photon)
+                adc_count[..., count] = trace_generator.adc_count
+                cherenkov_time[..., count] = trace_generator.cherenkov_time
+                cherenkov_photon[..., count] = trace_generator.cherenkov_photon
 
                 progress_bar.update(1)
 
-            adc_count = np.array(adc_count)
-            adc_count = np.rollaxis(adc_count, 0, len(adc_count.shape))
+            log.info('\t\t-|> Saving data to {}'.format(options.file_basename.format(file_number)))
             data.create_dataset('adc_count', data=adc_count, dtype=np.uint16)
-
-            cherenkov_time = np.array(cherenkov_time)
-            cherenkov_time = np.rollaxis(cherenkov_time, 0, len(cherenkov_time.shape))
             data.create_dataset('time', data=cherenkov_time)
-
-            cherenkov_photon = np.array(cherenkov_photon)
-            cherenkov_photon = np.rollaxis(cherenkov_photon, 0, len(cherenkov_photon.shape))
             data.create_dataset('charge', data=cherenkov_photon)
-
+            config.create_dataset('date', data=str(datetime.datetime.now()))
             hdf5.close()
+            log.info('\t\t-|> Done !!!')
             file_number += 1

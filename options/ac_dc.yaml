@@ -6,7 +6,7 @@ time_start : 0
 time_end : 200
 time_sampling : 4
 n_pixels : 1296
-nsb_rate : [0.1]
+nsb_rate : [0.]
 crosstalk : 0.08
 gain_nsb : True
 n_photon : [0]

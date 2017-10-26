@@ -11,7 +11,7 @@ class NTraceGenerator:
                  crosstalk=0.08, gain_nsb=True, n_photon=0, poisson=True,
                  sigma_e=0.8, sigma_1=0.8, gain=5.8,
                  baseline=200, time_signal=20, jitter=0,
-                 pulse_shape_file='/utils/pulse_SST-1M_AfterPreampLowGain.dat', seed=0, **kwargs):
+                 pulse_shape_file='/utils/pulse_SST-1M_AfterPreampLowGain.dat', seed=0, sub_binning=0, **kwargs):
 
         np.random.seed(seed)
 
@@ -63,6 +63,7 @@ class NTraceGenerator:
         self.pulse_template = interp1d(time_steps, amplitudes, kind='cubic', bounds_error=False,
                                        fill_value=0., assume_sorted=True)
 
+        self.sub_bining = sub_binning
         self.count = -1
         self.reset()
 
@@ -134,13 +135,22 @@ class NTraceGenerator:
 
         photon_number = np.random.poisson(lam=(self.time_end - self.time_start) * self.nsb_rate)
         max_photon = np.max(photon_number)
-        self.nsb_time = np.random.uniform(size=(self.n_pixels, max_photon)) * \
-                        (self.time_end - self.time_start) + self.time_start
+
+        if self.sub_bining <= 0:
+
+            self.nsb_time = np.random.uniform(size=(self.n_pixels, max_photon)) * \
+                            (self.time_end - self.time_start) + self.time_start
+            self.nsb_photon = np.ones(self.nsb_time.shape, dtype=int)
+
+        else:
+
+            sub_bins = np.arange(self.time_start, self.time_end, self.sub_bining)
+            hist = np.random.randint(0, sub_bins.shape[-1], size=(self.n_pixels, max_photon))
+
         self.mask = np.arange(max_photon)
         self.mask = np.tile(self.mask, (self.n_pixels, 1))
         self.mask = (self.mask < photon_number[..., np.newaxis])
         self.mask = self.mask.astype(int)
-        self.nsb_photon = np.ones(self.nsb_time.shape, dtype=int)
 
     def _poisson_crosstalk(self, mean_crosstalk_production):
 
