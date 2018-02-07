@@ -9,6 +9,7 @@ import logging
 import sys
 import tqdm
 import datetime
+import pandas as pd
 
 
 if __name__ == '__main__':
@@ -29,6 +30,8 @@ if __name__ == '__main__':
 
     (options, args) = parser.parse_args()
     options_yaml = {}
+    log.setLevel(0 if options.verbose else 20)
+
     with open(options.yaml_config) as stream:
 
         options_yaml.update(yaml.load(stream))
@@ -47,7 +50,7 @@ if __name__ == '__main__':
             exit()
 
     progress_bar = tqdm.tqdm(total=len(options.nsb_rate) * len(options.n_photon) * options.events_per_level)
-    log.info(vars(options))
+    log.debug(vars(options))
     log.info('\t\t-|> Create the Monte Carlo data set')
 
     options_generator = copy.copy(options)
@@ -65,6 +68,13 @@ if __name__ == '__main__':
 
             options_generator.n_photon = n_photon
 
+            if isinstance(n_photon, int) or isinstance(n_photon, float):
+                n_photon = [[n_photon]] * n_pixels
+                n_photon = np.atleast_2d(n_photon)
+
+            else:
+                n_photon = pd.DataFrame(n_photon).fillna(0).values
+
             hdf5 = h5py.File(options.output_directory + options.file_basename.format(file_number), 'w')
             config = hdf5.create_group('config')
 
@@ -73,9 +83,14 @@ if __name__ == '__main__':
                 config.create_dataset(key, data=val)
 
             data = hdf5.create_group('data')
+
+            # adc_count = data.create_dataset('adc_count', (n_pixels, n_bins, events_per_level), dtype=np.uint16, compression="gzip")
+            # cherenkov_time = data.create_dataset('time', n_photon.shape + (events_per_level, ), compression="gzip")
+            # cherenkov_photon = data.create_dataset('charge', n_photon.shape + (events_per_level, ), compression="gzip")
+
             adc_count = np.zeros(data_shape, dtype=np.uint16)
-            cherenkov_time = np.zeros((n_pixels, events_per_level))
-            cherenkov_photon = np.zeros((n_pixels, events_per_level))
+            cherenkov_time = np.zeros((n_pixels, n_photon.shape[-1], events_per_level))
+            cherenkov_photon = np.zeros((n_pixels, n_photon.shape[-1], events_per_level))
 
             for count, trace_generator in zip(range(options.events_per_level), NTraceGenerator(**vars(options_generator))):
 
@@ -86,10 +101,11 @@ if __name__ == '__main__':
                 progress_bar.update(1)
 
             log.info('\t\t-|> Saving data to {}'.format(options.file_basename.format(file_number)))
-            data.create_dataset('adc_count', data=adc_count, dtype=np.uint16)
-            data.create_dataset('time', data=cherenkov_time)
-            data.create_dataset('charge', data=cherenkov_photon)
+            data.create_dataset('adc_count', data=adc_count, dtype=np.uint16, compression="gzip")
+            data.create_dataset('time', data=cherenkov_time, compression="gzip")
+            data.create_dataset('charge', data=cherenkov_photon, compression="gzip")
             config.create_dataset('date', data=str(datetime.datetime.now()))
             hdf5.close()
+            progress_bar.update(1)
             log.info('\t\t-|> Done !!!')
             file_number += 1

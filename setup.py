@@ -18,6 +18,5 @@ setup(
     packages=['digicamtoy', 'digicamtoy.io', 'digicamtoy.core', 'digicamtoy.test', 'digicamtoy.utils',
               'digicamtoy.container', 'digicamtoy.production', 'digicamtoy.gui'],
     long_description=read('README.md'),
-    install_requires=['numpy', 'matplotlib', 'scipy', 'h5py', 'pyyaml', 'logging', 'tqdm', 'datetime']
-
+    install_requires=['numpy', 'matplotlib', 'scipy', 'h5py', 'pyyaml', 'logging', 'tqdm', 'datetime'],
 )

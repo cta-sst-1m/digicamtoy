@@ -3,6 +3,33 @@ import numpy as np
 from scipy.interpolate import interp1d
 import digicamtoy
 import copy
+import cython
+import pandas as pd
+
+"""
+from numba import jit, int64, float32
+
+
+@jit((int64(float32)))
+def _poisson_crosstalk(crosstalk):
+    n_cross_talk = np.random.poisson(crosstalk)
+    counter = n_cross_talk
+
+    for i in range(n_cross_talk):
+        counter += _poisson_crosstalk(crosstalk)
+
+    return counter
+
+@jit((int64(float32, int64)))
+def _generalized_poisson_crosstalk(crosstalk, n_photon):
+
+    counter = 0
+    for i in range(n_photon):
+
+        counter += _poisson_crosstalk(crosstalk)
+
+    return counter
+"""
 
 
 class NTraceGenerator:
@@ -11,17 +38,22 @@ class NTraceGenerator:
                  crosstalk=0.08, gain_nsb=True, n_photon=0, poisson=True,
                  sigma_e=0.8, sigma_1=0.8, gain=5.8,
                  baseline=200, time_signal=20, jitter=0,
-                 pulse_shape_file='/utils/pulse_SST-1M_AfterPreampLowGain.dat', seed=0, sub_binning=0, **kwargs):
+                 pulse_shape_file='/utils/pulse_SST-1M_pixel_0.dat', seed=0, sub_binning=0, **kwargs):
 
-        np.random.seed(seed)
+        # np.random.seed(seed)
 
         # print('unknown keyword arguments : \n',  kwargs)
         nsb_rate = np.atleast_1d(nsb_rate)
         nsb_rate = nsb_rate if nsb_rate.shape[0] > 1 else np.array([nsb_rate[0]]*n_pixels)
         crosstalk = np.atleast_1d(crosstalk)
         crosstalk = crosstalk if crosstalk.shape[0] > 1 else np.array([crosstalk[0]]*n_pixels)
-        n_photon = np.atleast_1d(n_photon)
-        n_photon = n_photon if n_photon.shape[0] > 1 else np.array([n_photon[0]]*n_pixels)
+        if isinstance(n_photon, int) or isinstance(n_photon, float):
+            n_photon = [[n_photon]]*n_pixels
+            n_photon = np.atleast_2d(n_photon)
+
+        else:
+            n_photon = pd.DataFrame(n_photon).fillna(0).values
+
         sigma_e = np.atleast_1d(sigma_e)
         sigma_e = sigma_e if sigma_e.shape[0] > 1 else np.array([sigma_e[0]]*n_pixels)
         sigma_1 = np.atleast_1d(sigma_1)
@@ -30,12 +62,22 @@ class NTraceGenerator:
         gain = gain if gain.shape[0] > 1 else np.array([gain[0]]*n_pixels)
         baseline = np.atleast_1d(baseline)
         baseline = baseline if baseline.shape[0] > 1 else np.array([baseline[0]]*n_pixels)
-        time_signal = np.atleast_1d(time_signal)
-        time_signal = time_signal if time_signal.shape[0] > 1 else np.array([time_signal[0]]*n_pixels)
-        jitter = np.atleast_1d(jitter)
-        jitter = jitter if jitter.shape[0] > 1 else np.array([jitter[0]]*n_pixels)
+
+        if isinstance(time_signal, int) or isinstance(time_signal, float):
+            time_signal = [[time_signal]]*n_pixels
+            time_signal = np.atleast_2d(time_signal)
+
+        else:
+            time_signal = pd.DataFrame(time_signal).fillna(0).values
+
+        if isinstance(jitter, int) or isinstance(jitter, float):
+            jitter = [[jitter]]*n_pixels
+            jitter = np.atleast_2d(jitter)
+        else:
+            jitter = pd.DataFrame(jitter).fillna(0).values
 
         self.artificial_backward_time = 40
+        self.n_samples = (time_end - time_start) // time_sampling # n_samples of the output waveform
         self.time_start = time_start - self.artificial_backward_time
         self.time_end = time_end
         self.time_sampling = time_sampling
@@ -58,8 +100,14 @@ class NTraceGenerator:
         self.baseline = baseline
         self.sigma_1 = sigma_1 / self.gain
 
-        time_steps, amplitudes = np.loadtxt(self.filename_pulse_shape, unpack=True, skiprows=1)
-        amplitudes = amplitudes / min(amplitudes)
+        time_steps, amplitudes = np.loadtxt(self.filename_pulse_shape, unpack=True)
+        self.pulse_template = interp1d(time_steps, amplitudes, kind='cubic', bounds_error=False,
+                                       fill_value=0., assume_sorted=True)
+        temp_times = np.arange(self.time_start, self.time_end, self.time_sampling/100)
+
+        temp_amplitudes = self.pulse_template(temp_times)
+        amplitudes = amplitudes / np.max(temp_amplitudes)
+        self.tau = np.trapz(temp_amplitudes/np.max(temp_amplitudes), temp_times)
         self.pulse_template = interp1d(time_steps, amplitudes, kind='cubic', bounds_error=False,
                                        fill_value=0., assume_sorted=True)
 
@@ -87,8 +135,8 @@ class NTraceGenerator:
 
     def reset(self):
 
-        self.cherenkov_time = np.zeros(self.n_pixels)
-        self.cherenkov_photon = np.zeros(self.n_pixels, dtype=np.int)
+        self.cherenkov_time = np.zeros(self.n_photon.shape)
+        self.cherenkov_photon = np.zeros(self.n_photon.shape, dtype=np.int)
         self.nsb_time = np.zeros((self.n_pixels, 1))
         self.nsb_photon = np.zeros((self.n_pixels, 1))
         self.mask = np.zeros(self.nsb_photon.shape)
@@ -152,16 +200,33 @@ class NTraceGenerator:
         self.mask = (self.mask < photon_number[..., np.newaxis])
         self.mask = self.mask.astype(int)
 
-    def _poisson_crosstalk(self, mean_crosstalk_production):
+    def _poisson_crosstalk(self, crosstalk):
 
-        n_cross_talk = np.random.poisson(mean_crosstalk_production)
+        n_cross_talk = np.random.poisson(crosstalk)
         counter = n_cross_talk
 
         for i in range(n_cross_talk):
-
-            counter += self._poisson_crosstalk(mean_crosstalk_production)
+            counter += self._poisson_crosstalk(crosstalk)
 
         return counter
+
+    def _poisson_crosstalk_2(self, crosstalk, counter=0):
+
+        n_cross_talk = np.random.poisson(crosstalk)
+
+        if n_cross_talk == 0:
+
+            return counter
+
+        else:
+
+            counter += n_cross_talk
+            i = 0
+
+            while i < n_cross_talk:
+                counter += self._poisson_crosstalk_2(crosstalk, counter)
+                i += 1
+            return counter
 
     def generate_crosstalk(self):
 
@@ -174,9 +239,11 @@ class NTraceGenerator:
 
                 nsb_crosstalk[pixel, i] = self._poisson_crosstalk(self.crosstalk[pixel])
 
-            for ii in range(self.cherenkov_photon[pixel]):
+            for j in range(self.cherenkov_photon.shape[-1]):
 
-                cherenkov_crosstalk[pixel] += self._poisson_crosstalk(self.crosstalk[pixel])
+                for k in range(self.cherenkov_photon[pixel, j]):
+
+                    cherenkov_crosstalk[pixel, j] += self._poisson_crosstalk(self.crosstalk[pixel])
 
         self.nsb_photon += nsb_crosstalk
         self.cherenkov_photon += cherenkov_crosstalk
@@ -184,7 +251,7 @@ class NTraceGenerator:
     def generate_photon_smearing(self):
 
         nsb_smearing = np.sqrt(self.nsb_photon) * self.sigma_1[:, np.newaxis]
-        cherenkov_smearing = np.sqrt(self.cherenkov_photon) * self.sigma_1
+        cherenkov_smearing = np.sqrt(self.cherenkov_photon) * self.sigma_1[:, np.newaxis]
 
         mask = nsb_smearing <= 0
         nsb_smearing[mask] = 1
@@ -208,7 +275,8 @@ class NTraceGenerator:
         self.adc_count = np.sum(self.adc_count, axis=1)
         times = self.sampling_bins - self.cherenkov_time[..., np.newaxis]
         temp = self.get_pulse_shape(times) * self.cherenkov_photon[..., np.newaxis]
-        self.adc_count = self.adc_count + temp
+        temp = np.sum(temp, axis=1)
+        self.adc_count += temp
         self.adc_count = self.adc_count * self.gain[..., np.newaxis]
 
     def generate_electronic_smearing(self):
@@ -237,6 +305,6 @@ if __name__ == '__main__':
 
         plt.step(toy.sampling_bins, toy.adc_count[0])
         plt.step(toy.sampling_bins, toy.adc_count[1295])
-        print(toy.count)
-        print(toy.nsb_rate)
-        plt.show()
+        # plt.show()
+        if i >= 10:
+            exit()
