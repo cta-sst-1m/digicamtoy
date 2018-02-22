@@ -77,7 +77,8 @@ class NTraceGenerator:
             jitter = pd.DataFrame(jitter).fillna(0).values
 
         self.artificial_backward_time = 40
-        self.n_samples = (time_end - time_start) // time_sampling # n_samples of the output waveform
+        # n_samples of the output waveform
+        self.n_samples = (time_end - time_start) // time_sampling
         self.time_start = time_start - self.artificial_backward_time
         self.time_end = time_end
         self.time_sampling = time_sampling
