@@ -2,9 +2,6 @@ import os.path
 from scipy.interpolate import interp1d
 import copy
 import pandas as pd
-import pickle
-import sys
-import matplotlib.pyplot as plt
 import numpy as np
 
 from digicamtoy.utils.pulse_shape import return_interpolant
@@ -127,7 +124,8 @@ class NTraceGenerator:
 
         temp_amplitudes = self.pulse_template(temp_times)
         amplitudes = amplitudes / np.max(temp_amplitudes)
-        self.tau = np.trapz(temp_amplitudes/np.max(temp_amplitudes), temp_times)
+        self.tau = np.trapz(temp_amplitudes / np.max(temp_amplitudes),
+                            temp_times)
         self.pulse_template = interp1d(time_steps, amplitudes, kind='cubic',
                                        bounds_error=False, fill_value=0.,
                                        assume_sorted=True)
@@ -205,7 +203,8 @@ class NTraceGenerator:
 
     def generate_nsb(self):
 
-        photon_number = np.random.poisson(lam=(self.time_end - self.time_start) * self.nsb_rate)
+        mean_nsb_pe = (self.time_end - self.time_start) * self.nsb_rate
+        photon_number = np.random.poisson(lam=mean_nsb_pe)
         max_photon = np.max(photon_number)
 
         if self.sub_binning <= 0:
