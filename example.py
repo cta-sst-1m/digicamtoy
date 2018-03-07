@@ -1,4 +1,4 @@
-from digicamtoy.core.Ntracegenerator import NTraceGenerator
+from digicamtoy.tracegenerator import NTraceGenerator
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -11,7 +11,9 @@ if __name__ == '__main__':
                           time_signal=[[0, 100], [20, 50, 100], [0, 100]],
                           gain=[10, 10, 29])
 
-    t = np.arange(toy.time_start + toy.artificial_backward_time, toy.time_end, toy.time_sampling)
+    t = np.arange(toy.time_start + toy.artificial_backward_time,
+                  toy.time_end,
+                  toy.time_sampling)
 
     for event in toy:
 
