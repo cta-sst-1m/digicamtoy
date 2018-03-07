@@ -24,5 +24,5 @@ if __name__ == '__main__':
         plt.plot(t, event.adc_count[1], ls='steps-pre')
         plt.plot(t, event.adc_count[2], ls='steps-pre')
         plt.xlabel('t [ns]')
-        plt.ylabel('ADC []')
+        plt.ylabel('[LSB]')
         plt.show()
