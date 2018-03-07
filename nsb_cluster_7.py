@@ -1,16 +1,15 @@
-from digicamtoy.core.Ntracegenerator import NTraceGenerator
+from digicamtoy.tracegenerator import NTraceGenerator
 import matplotlib.pyplot as plt
 import numpy as np
 
 
 if __name__ == '__main__':
 
-
     nsb = np.linspace(1, 1.5, 3)
     n_events = 10
     cluster_lsb = np.zeros((len(nsb), n_events, 50))
-    trigger_prob = [None]*len(nsb)
-    threshold = [None]*len(nsb)
+    trigger_prob = [None] * len(nsb)
+    threshold = [None] * len(nsb)
 
     n_pixels = 21
     baseline = np.zeros((len(nsb), n_pixels))
@@ -23,8 +22,6 @@ if __name__ == '__main__':
             baseline[j] += np.mean(toy.adc_count, axis=-1)
         baseline = baseline / 1000
 
-
-
         # plt.figure()
         for i in range(n_events):
             toy.next()
@@ -36,7 +33,8 @@ if __name__ == '__main__':
         #        plt.plot(trigger_trace)
             cluster_lsb[j, i] = trigger_trace
 
-        temp = cluster_lsb.reshape(cluster_lsb.shape[0], cluster_lsb.shape[1] * cluster_lsb.shape[2])
+        temp = cluster_lsb.reshape(cluster_lsb.shape[0],
+                                   cluster_lsb.shape[1] * cluster_lsb.shape[2])
         hist = np.histogram(temp, bins='auto')
         bins = hist[1]
         hist = hist[0]
@@ -50,7 +48,3 @@ if __name__ == '__main__':
     for i in range(len(threshold)):
         plt.semilogy(threshold[i],  trigger_prob[i])
     plt.show()
-
-
-
-
