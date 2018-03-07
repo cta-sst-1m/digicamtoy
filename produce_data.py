@@ -6,7 +6,7 @@ import h5py
 import numpy as np
 import copy
 import logging
-import sys
+import humanize
 from tqdm import tqdm
 import datetime
 import pandas as pd
@@ -22,15 +22,18 @@ if __name__ == '__main__':
                       default='options/ac_dc_scan.yaml')
 
     # Output level
-    parser.add_option("-v", "--verbose",
-                      action="store_false", dest="verbose", default=True,
+    parser.add_option("-d", "--debug",
+                      action="store_true", dest="debug", default=False,
                       help="move to debug")
 
-    log = logging.getLogger(sys.modules['__main__'].__name__ + '.' + __name__)
+    log = logging
 
     (options, args) = parser.parse_args()
     options_yaml = {}
-    log.setLevel(0 if options.verbose else 20)
+    log.getLogger().setLevel(logging.INFO)
+
+    if options.debug:
+        log.getLogger().setLevel(logging.DEBUG)
 
     with open(options.yaml_config) as stream:
 
@@ -74,7 +77,9 @@ if __name__ == '__main__':
             else:
                 n_photon = pd.DataFrame(n_photon).fillna(0).values
 
-            hdf5 = h5py.File(options.output_directory + options.file_basename.format(file_number), 'w')
+            filename = options.output_directory + options.file_basename.format(file_number)
+
+            hdf5 = h5py.File(filename, 'w')
             config = hdf5.create_group('config')
 
             for key, val in vars(options_generator).items():
@@ -99,5 +104,7 @@ if __name__ == '__main__':
             data.create_dataset('charge', data=cherenkov_photon, compression="gzip")
             config.create_dataset('date', data=str(datetime.datetime.now()))
             hdf5.close()
-            log.info('\t\t-|> Done !!!')
+            file_size = os.path.getsize(filename)
+            file_size = humanize.naturalsize(file_size, binary=True)
+            log.info('\t\t-|> File saved! Size = {}'.format(file_size))
             file_number += 1
