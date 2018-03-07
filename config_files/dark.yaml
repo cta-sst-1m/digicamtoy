@@ -1,6 +1,6 @@
 output_directory : /data/datasets/CTA/digicamtoy/
 file_basename : dark_digicamtoy_{}.hdf5
-events_per_level : 1000
+events_per_level : 100
 
 time_start : 0
 time_end : 368
