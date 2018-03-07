@@ -42,7 +42,7 @@ class NTraceGenerator:
                  poisson=True, sigma_e=0.8, sigma_1=0.8, gain=5.8,
                  baseline=200, time_signal=20, jitter=0,
                  pulse_shape_file='/utils/pulse_SST-1M_pixel_0.dat',
-                 sub_binning=0, **kwargs):
+                 sub_binning=0, **kwargs): #TODO not allow **kwargs (change in produce_data)
 
         # np.random.seed(seed)
 
