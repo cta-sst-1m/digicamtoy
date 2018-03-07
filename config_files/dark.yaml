@@ -1,6 +1,6 @@
 output_directory : /data/datasets/CTA/digicamtoy/
 file_basename : dark_digicamtoy_{}.hdf5
-events_per_level : 100
+events_per_level : 10000
 
 time_start : 0
 time_end : 368
@@ -18,4 +18,3 @@ baseline : 200
 time_signal : 0.
 jitter : 0.3
 pulse_shape_file : /utils/pulse_SST-1M_pixel_0.dat
-seed : 6122
