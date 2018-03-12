@@ -335,6 +335,11 @@ class NTraceGenerator:
         self.adc_count += smearing
 
     def convert_to_digital(self):
+        '''
+        * remove some artificial samples at the beginning
+        * add baseline
+        * and only then: digitize
+        '''
 
         n_bins_to_remove = self.artificial_backward_time // self.time_sampling
         indices_to_remove = range(0, n_bins_to_remove, 1)
