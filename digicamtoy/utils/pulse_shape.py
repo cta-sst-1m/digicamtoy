@@ -6,17 +6,17 @@ import os.path
 __all__ = ['get_pulse_shape']
 
 
-def compute_normalized_pulse_shape_area():
+def compute_normalized_pulse_shape_area(linspace=(0, 100, 1000)):
     f = return_interpolant()
-    time_steps = np.linspace(0, 100, 1000)
+    time_steps = np.linspace(*linspace)
     amplitudes = f(time_steps)
     delta_t = np.trapz(amplitudes, time_steps)
     return delta_t
 
 
-def compute_normalized_pulse_shape_area_square():
+def compute_normalized_pulse_shape_area_square(linspace=(0, 100, 1000)):
     f = return_interpolant()
-    time_steps = np.linspace(0, 100, 1000)
+    time_steps = np.linspace(*linspace)
     amplitudes = f(time_steps)**2
     delta_t = np.trapz(amplitudes, time_steps)
     return delta_t
@@ -56,10 +56,13 @@ def return_interpolant():
     )
 
 
-def get_pulse_shape(time, t_0, amplitude, baseline=0):
-
+def get_pulse_shape(
+    time=np.arange(-10, 200, 4),
+    t_0=0,
+    amplitude=1,
+    baseline=0
+):
     f = return_interpolant()
-
     return amplitude * f(time - t_0) + baseline
 
 
