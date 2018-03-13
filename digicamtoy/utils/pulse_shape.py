@@ -60,7 +60,14 @@ def compute_mean_pulse_shape_value():
 def return_interpolant():
     time_steps, amplitudes = compute_normalized_pulse_shape()
 
-    return scipy.interpolate.interp1d(time_steps, amplitudes, kind='cubic', bounds_error=False, fill_value=0., assume_sorted=True)
+    return scipy.interpolate.interp1d(
+        time_steps,
+        amplitudes,
+        kind='cubic',
+        bounds_error=False,
+        fill_value=0.,
+        assume_sorted=True
+    )
 
 
 def get_pulse_shape(time, t_0, amplitude, baseline=0):
