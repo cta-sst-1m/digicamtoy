@@ -57,13 +57,18 @@ def return_interpolant():
 
 
 def get_pulse_shape(
-    time=np.arange(-10, 200, 4),
+    time=np.arange(-10, 100, 4),
     t_0=0,
     amplitude=1,
-    baseline=0
+    baseline=0,
+    return_time=False
 ):
     f = return_interpolant()
-    return amplitude * f(time - t_0) + baseline
+    result = amplitude * f(time - t_0) + baseline
+    if not return_time:
+        return result
+    else:
+        return time, result
 
 
 if __name__ == '__main__':
