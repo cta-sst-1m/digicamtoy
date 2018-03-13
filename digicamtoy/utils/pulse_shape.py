@@ -49,7 +49,7 @@ def compute_normalized_pulse_shape(
         unpack=True,
         skiprows=1,
     )
-    amplitudes = amplitudes / min(amplitudes)
+    amplitudes /= amplitudes.max()
 
     return time_steps, amplitudes
 
