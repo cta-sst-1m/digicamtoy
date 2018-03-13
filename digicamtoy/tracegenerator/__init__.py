@@ -300,8 +300,10 @@ class NTraceGenerator:
     def generate_photon_smearing(self):
 
         nsb_smearing = np.sqrt(self.nsb_photon) * self.sigma_1[:, np.newaxis]
-        cherenkov_smearing = np.sqrt(self.cherenkov_photon) * \
-                             self.sigma_1[:, np.newaxis]
+        cherenkov_smearing = (
+            np.sqrt(self.cherenkov_photon) *
+            self.sigma_1[:, np.newaxis]
+        )
 
         mask = nsb_smearing <= 0
         nsb_smearing[mask] = 1
