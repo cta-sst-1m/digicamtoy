@@ -329,13 +329,18 @@ class NTraceGenerator:
     def compute_analog_signal(self):
         '''
         self.sampling_bins: 1d, (n_samples,)
-        self.nsb_time: 2d, (n_pixels, 1)
+        self.nsb_time: 2d, (n_pixels, some_number)
+        times: 3d, (n_pixels, some_number, n_samples)
         self.nsb_photon: 2d, (n_pixels, 1)
         self.mask: 1d, (maxphoton, )
+
+        I think some_number and maxphoton might be the same
+
             * sample noise photons onto the timeline
             * sample cherencov photons onto the timeline
             * multiply with gain
         '''
+
         times = self.sampling_bins - self.nsb_time[..., np.newaxis]
         self.adc_count = (
             self.get_pulse_shape(times) *
