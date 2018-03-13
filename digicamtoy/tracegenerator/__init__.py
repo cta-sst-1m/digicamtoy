@@ -62,6 +62,19 @@ class NTraceGenerator:
             electronics noise (std-dev of normal distribution)
             electronics noise is simulated as white noise.
 
+        jitter: scalar or 1d or 2d array of shape: ???
+            I do not know what kind of jitter is meant here, and in what
+            unit it might be given.
+
+        n_photon: sclar or 1d or 2d of shape: ???
+            the expectation value of the number of photons
+            per pixel and per event.
+            The actual number of photons per pixel and per event is drawn from
+            a poisson distribution, with the expectation value `n_photons`.
+            Even negative values are allowed.
+
+        time_signal: scalar or 1d or 2d of shape: ???
+            the time (in samples) where the cherencov signal should be simulated.
         '''
 
         # np.random.seed(seed)
@@ -210,6 +223,14 @@ class NTraceGenerator:
         self.convert_to_digital()
 
     def add_signal_photon(self):
+        '''
+        set two internal variables:
+            self.cherenkov_time,
+            self.cherenkov_photon
+
+        * calculate arrival time of cherenkov-photon-bundle: time_signal + jitter
+        * calculate size of cherenkov-photon-bundle: from poisson distribution.
+        '''
 
         jitter = copy.copy(self.jitter)
         mask = jitter <= 0
@@ -217,8 +238,11 @@ class NTraceGenerator:
         jitter = np.random.uniform(0, jitter)
         jitter[mask] = 0
         self.cherenkov_time = self.time_signal + jitter
-        self.cherenkov_photon = np.random.poisson(lam=self.n_photon) if \
-            self.poisson else self.n_photon
+        self.cherenkov_photon = (
+            np.random.poisson(lam=self.n_photon)
+            if self.poisson
+            else self.n_photon
+        )
         self.cherenkov_photon[self.n_photon <= 0] = 0
 
     def generate_nsb(self):
