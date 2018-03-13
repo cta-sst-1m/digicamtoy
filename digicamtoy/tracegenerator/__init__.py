@@ -237,10 +237,16 @@ class NTraceGenerator:
 
         else:
 
-            sub_bins = np.arange(self.time_start, self.time_end,
-                                 self.sub_binning)
-            hist = np.random.randint(0, sub_bins.shape[-1],
-                                     size=(self.n_pixels, max_photon))
+            sub_bins = np.arange(
+                self.time_start,
+                self.time_end,
+                self.sub_binning
+            )
+            hist = np.random.randint(
+                0,
+                sub_bins.shape[-1],
+                size=(self.n_pixels, max_photon)
+            )
 
         self.mask = np.arange(max_photon)
         self.mask = np.tile(self.mask, (self.n_pixels, 1))
