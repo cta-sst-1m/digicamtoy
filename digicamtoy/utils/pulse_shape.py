@@ -65,6 +65,6 @@ def get_pulse_shape(time, t_0, amplitude, baseline=0):
 
 if __name__ == '__main__':
 
-    print('mean amplitude of pulse shape : %0.8f' %compute_mean_pulse_shape_value())
-    print('pulse shape area : %0.8f' %compute_normalized_pulse_shape_area())
-    print('pulse shape area square : %0.8f' %compute_normalized_pulse_shape_area_square())
+    print('mean amplitude of pulse shape : %0.8f' % compute_mean_pulse_shape_value())
+    print('pulse shape area : %0.8f' % compute_normalized_pulse_shape_area())
+    print('pulse shape area square : %0.8f' % compute_normalized_pulse_shape_area_square())
