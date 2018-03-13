@@ -58,6 +58,16 @@ class NTraceGenerator:
         **kwargs
     ):
         '''
+        time_start: scalar
+            start time of sampled waveforms (in ns?).
+
+        time_end: scalar
+            end time of sampled waveforms in the same unit as time_start.
+
+        time_sampling: scalar
+            number of samples per unit of time. or units of time per sample.
+            (digicam samples with 250MHz so a sample is 4ns long.)
+
         sigma_e: scalar or 1-d array of shape (n_pixels, )
             electronics noise (std-dev of normal distribution)
             electronics noise is simulated as white noise.
@@ -246,7 +256,6 @@ class NTraceGenerator:
         self.cherenkov_photon[self.n_photon <= 0] = 0
 
     def generate_nsb(self):
-
         mean_nsb_pe = (self.time_end - self.time_start) * self.nsb_rate
         photon_number = np.random.poisson(lam=mean_nsb_pe)
         max_photon = np.max(photon_number)
