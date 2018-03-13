@@ -1,9 +1,7 @@
 import numpy as np
 import os
 import scipy.interpolate
-import os
-dir = os.path.dirname(__file__)
-filename_pulse_shape = dir + '/pulse_SST-1M_AfterPreampLowGain.dat'  # pulse shape template file
+import os.path
 
 __all__ = ['get_pulse_shape']
 
@@ -40,9 +38,17 @@ def compute_normalized_pulse_shape_area_square():
     return delta_t
 
 
-def compute_normalized_pulse_shape():
-
-    time_steps, amplitudes = np.loadtxt(filename_pulse_shape, unpack=True, skiprows=1)
+def compute_normalized_pulse_shape(
+    pulse_shape_file_path=os.path.join(
+        os.path.dirname(__file__),
+        'pulse_SST-1M_AfterPreampLowGain.dat'
+        )
+):
+    time_steps, amplitudes = np.loadtxt(
+        pulse_shape_file_path,
+        unpack=True,
+        skiprows=1,
+    )
     amplitudes = amplitudes / min(amplitudes)
 
     return time_steps, amplitudes
