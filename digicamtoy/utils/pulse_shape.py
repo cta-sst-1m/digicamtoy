@@ -33,15 +33,12 @@ def compute_normalized_pulse_shape(
         unpack=True
     )
     amplitudes /= amplitudes.max()
-
     return time_steps, amplitudes
 
 
 def compute_mean_pulse_shape_value():
-
     time_steps, amplitudes = compute_normalized_pulse_shape()
     mean_time = np.average(time_steps, weights=amplitudes)
-
     f = return_interpolant()
     return f(mean_time)
 
