@@ -46,8 +46,7 @@ def compute_normalized_pulse_shape(
 ):
     time_steps, amplitudes = np.loadtxt(
         pulse_shape_file_path,
-        unpack=True,
-        skiprows=1,
+        unpack=True
     )
     amplitudes /= amplitudes.max()
 
