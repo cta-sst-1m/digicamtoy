@@ -15,18 +15,10 @@ def compute_normalized_pulse_shape_area():
 
 
 def compute_normalized_pulse_shape_area_square():
-
-    #time_steps, amplitudes = compute_normalized_pulse_shape()
-
     f = return_interpolant()
     time_steps = np.linspace(0, 100, 1000)
-    amplitudes = np.zeros(time_steps.shape[0])
-
-    for i in range(amplitudes.shape[0]):
-        amplitudes[i] = f(time_steps[i])**2
-
+    amplitudes = f(time_steps)**2
     delta_t = np.trapz(amplitudes, time_steps)
-
     return delta_t
 
 
