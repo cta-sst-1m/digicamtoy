@@ -57,6 +57,12 @@ class NTraceGenerator:
         sub_binning=0,
         **kwargs
     ):
+        '''
+        sigma_e: scalar or 1-d array of shape (n_pixels, )
+            electronics noise (std-dev of normal distribution)
+            electronics noise is simulated as white noise.
+
+        '''
 
         # np.random.seed(seed)
 
@@ -326,6 +332,15 @@ class NTraceGenerator:
         self.adc_count = self.adc_count * self.gain[..., np.newaxis]
 
     def generate_electronic_smearing(self):
+        '''
+        self.sigma_e is 1d of shape: (n_pixel, )
+
+        * make sure self.sigma_e is positive
+        * convert the scalar self.sigma_e into an array of identical
+            values with shape (n_pixel, n_samples)
+        * use this as the `scale` parameter of np.random.normal
+        * add a white noise to self.adc_count
+        '''
 
         smearing_spread = np.sqrt(self.sigma_e ** 2)
         smearing_spread = np.tile(smearing_spread,
