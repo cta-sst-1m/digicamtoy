@@ -1,7 +1,6 @@
 from digicamtoy.tracegenerator import NTraceGenerator
 import matplotlib.pyplot as plt
 import numpy as np
-from tqdm import tqdm
 
 plt.figure()
 
@@ -36,22 +35,10 @@ for gain in np.linspace(3, 5, 5):
     means = np.array(means)
     stds = np.array(stds)
 
-
-    """
-    plt.errorbar(
-        x=nsb_rates,
-        y=means.mean(axis=1) / means.mean(axis=1).max(),
-        yerr=means.std(axis=1) / (np.sqrt(N) * means.mean(axis=1).max()),
-        fmt='.:',
-        label='means',
-    )
-    plt.semilogx(nsb_rates, gains / np.max(gains), '.:', label='gains')
-    """
-
     plt.errorbar(
         x=nsb_rates,
         y=stds.mean(axis=1),
-        #yerr=stds.std(axis=1) / (np.sqrt(N) * stds.mean(axis=1).max()),
+        yerr=stds.std(axis=1) / np.sqrt(N),
         fmt='.:',
         label='gain: {}'.format(gain),
     )
