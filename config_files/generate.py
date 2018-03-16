@@ -47,7 +47,7 @@ if __name__ == '__main__':
     output_file_name = 'nsb_{}.hdf5'
     config_file_path = 'commissioning/nsb_{}.yml'
 
-    nsb_rates = np.linspace(0, 1, num=30)
+    nsb_rates = np.linspace(0, 2, num=30)
 
     for i, nsb_rate in enumerate(nsb_rates):
 
