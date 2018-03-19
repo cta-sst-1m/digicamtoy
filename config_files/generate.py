@@ -30,7 +30,7 @@ def add_standard_camera_parameters(parameters):
 
 def add_light_parameters(parameters, nsb_rate, n_photon):
 
-    n_pixels = parameters['n_pixels']
+    # n_pixels = parameters['n_pixels']
 
     parameters['nsb_rate'] = [float(nsb_rate)]
     parameters['n_photon'] = [float(n_photon)]
@@ -55,13 +55,11 @@ if __name__ == '__main__':
 
         for j, nsb_rate in enumerate(nsb_rates):
 
-            if j == 1:
+            for k in range(200):
 
-                for k in range(200):
+                add_light_parameters(params, nsb_rate, n_photon=0)
+                params['file_basename'] = output_file_name.format(i, j, k)
 
-                    add_light_parameters(params, nsb_rate, n_photon=0)
-                    params['file_basename'] = output_file_name.format(i, j, k)
+                with open(config_file_path.format(i, j, k), mode='w') as file:
 
-                    with open(config_file_path.format(i, j, k), mode='w') as file:
-
-                        yaml.dump(params, file, Dumper=CDumper)
+                    yaml.dump(params, file, Dumper=CDumper)

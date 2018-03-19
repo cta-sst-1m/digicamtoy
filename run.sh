@@ -6,7 +6,6 @@
 #SBATCH --ntasks=1
 #SBATCH --time=0-12:00:00
 #SBATCH --partition=mono
-# SBATCH --export=HOME
 #SBATCH --output=/home/alispach/output/slurm-%A.out
 #SBATCH --error=/home/alispach/output/slurm-%A.err
 #SBATCH --mail-user=alispach
@@ -14,11 +13,10 @@
 #SBATCH --mem=2000
 #SBATCH --verbose
 
-
 echo "-----START JOB $SLURM_JOB_ID at `date`-----"
 
 # srun source /home/alispach/.anaconda3/envs/digicamtoy/bin/activate
-source /home/alispach/.anaconda3/envs/digicamtoy/bin/activate digicamtoy
+source $HOME/.anaconda3/envs/digicamtoy/bin/activate digicamtoy
 srun python produce_data.py -y config_files/commissioning/ac_$1_dc_$2_id_$3.yml
 
 
