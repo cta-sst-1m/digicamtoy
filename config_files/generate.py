@@ -31,29 +31,34 @@ def add_light_parameters(parameters, nsb_rate, n_photon):
 
     n_pixels = parameters['n_pixels']
 
-    parameters['nsb_rate'] = [float(nsb_rate)] * n_pixels
-    parameters['n_photon'] = [float(n_photon)] * n_pixels
+    parameters['nsb_rate'] = [float(nsb_rate)]
+    parameters['n_photon'] = [float(n_photon)]
 
 
 if __name__ == '__main__':
 
     params = dict()
     params['output_directory'] = '/sst1m/MC/digicamtoy/'
-    params['events_per_level'] = 20000
+    params['events_per_level'] = 100
 
     add_standard_camera_parameters(params)
     add_standard_sipm_parameters(params)
 
-    output_file_name = 'nsb_{}.hdf5'
-    config_file_path = 'commissioning/nsb_{}.yml'
+    output_file_name = 'ac_{}_dc_{}_id_{}.hdf5'
+    config_file_path = 'commissioning/ac_{}_dc_{}_id_{}.yml'
 
     nsb_rates = np.linspace(0, 2, num=30)
+    n_photons = np.linspace(0, 2000, num=30)
 
-    for i, nsb_rate in enumerate(nsb_rates):
+    for i, n_photon in enumerate(n_photons):
 
-        add_light_parameters(params, nsb_rate, n_photon=0)
-        params['file_basename'] = output_file_name.format(i)
+        for j, nsb_rate in enumerate(nsb_rates):
 
-        with open(config_file_path.format(i), mode='w') as file:
+            for k in range(200):
 
-            yaml.dump(params, file)
+                add_light_parameters(params, nsb_rate, n_photon=0)
+                params['file_basename'] = output_file_name.format(i, j, k)
+
+                with open(config_file_path.format(i, j, k), mode='w') as file:
+
+                    yaml.dump(params, file)
