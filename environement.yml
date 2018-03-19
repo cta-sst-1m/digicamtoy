@@ -1,6 +1,7 @@
 name: digicamtoy
 channels:
 - defaults
+- prometeia
 dependencies:
 - python=3.5.4
 - docopt=0.6.2
@@ -11,5 +12,4 @@ dependencies:
 - pyyaml
 - scipy
 - tqdm
-- pip:
-  - humanize
+- humanize
