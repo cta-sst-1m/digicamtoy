@@ -1,6 +1,7 @@
 import os
 from optparse import OptionParser
 import yaml
+from yaml import CLoader
 from digicamtoy.tracegenerator import NTraceGenerator
 import h5py
 import numpy as np
@@ -37,7 +38,7 @@ if __name__ == '__main__':
 
     with open(options.yaml_config) as stream:
 
-        options_yaml.update(yaml.load(stream))
+        options_yaml.update(yaml.load(stream, Loader=CLoader))
 
     for key, val in options_yaml.items():
 

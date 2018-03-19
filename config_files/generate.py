@@ -1,6 +1,7 @@
 import yaml
+from yaml import CDumper
 import numpy as np
-import os
+from tqdm import tqdm
 
 
 def add_standard_sipm_parameters(parameters):
@@ -50,15 +51,17 @@ if __name__ == '__main__':
     nsb_rates = np.linspace(0, 2, num=30)
     n_photons = np.linspace(0, 2000, num=30)
 
-    for i, n_photon in enumerate(n_photons):
+    for i, n_photon in tqdm(enumerate(n_photons), total=len(n_photons)):
 
         for j, nsb_rate in enumerate(nsb_rates):
 
-            for k in range(200):
+            if j == 1:
 
-                add_light_parameters(params, nsb_rate, n_photon=0)
-                params['file_basename'] = output_file_name.format(i, j, k)
+                for k in range(200):
 
-                with open(config_file_path.format(i, j, k), mode='w') as file:
+                    add_light_parameters(params, nsb_rate, n_photon=0)
+                    params['file_basename'] = output_file_name.format(i, j, k)
 
-                    yaml.dump(params, file)
+                    with open(config_file_path.format(i, j, k), mode='w') as file:
+
+                        yaml.dump(params, file, Dumper=CDumper)
