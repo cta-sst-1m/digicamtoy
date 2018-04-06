@@ -56,7 +56,7 @@ if __name__ == '__main__':
         for j, nsb_rate in tqdm(enumerate(nsb_rates), total=len(nsb_rates),
                                 leave=False):
 
-            for k in tqdm(range(200), leave=False):
+            for k in tqdm(range(1000), leave=False):
 
                 add_light_parameters(params, nsb_rate, n_photon=0)
                 params['file_basename'] = output_file_name.format(i, j, k)
