@@ -21,5 +21,5 @@ setup(
     include_package_data=True,
     long_description=read('README.md'),
     install_requires=['numpy', 'matplotlib', 'scipy', 'h5py', 'pyyaml',
-                      'logging', 'tqdm', 'datetime', 'cython', 'pandas'],
+                      'tqdm', 'datetime', 'cython', 'pandas'],
 )
