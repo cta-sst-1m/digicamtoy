@@ -43,7 +43,7 @@ def compute_normalized_pulse_shape_area_square():
 def compute_normalized_pulse_shape():
 
     time_steps, amplitudes = np.loadtxt(filename_pulse_shape, unpack=True, skiprows=1)
-    amplitudes = amplitudes / min(amplitudes)
+    amplitudes = amplitudes / amplitudes.max()
 
     return time_steps, amplitudes
 
