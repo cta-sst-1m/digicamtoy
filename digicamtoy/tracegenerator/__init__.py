@@ -3,6 +3,7 @@ from scipy.interpolate import interp1d
 import copy
 import pandas as pd
 import numpy as np
+from pkg_resources import resource_filename
 
 from digicamtoy.utils.pulse_shape import return_interpolant
 import digicamtoy
@@ -33,7 +34,6 @@ def _generalized_poisson_crosstalk(crosstalk, n_photon):
     return counter
 """
 
-
 class NTraceGenerator:
 
     def __init__(self,
@@ -41,8 +41,11 @@ class NTraceGenerator:
                  nsb_rate=0.6, crosstalk=0.08, gain_nsb=True, n_photon=0,
                  poisson=True, sigma_e=0.8, sigma_1=0.8, gain=5.8,
                  baseline=200, time_signal=20, jitter=0,
-                 pulse_shape_file='/utils/pulse_SST-1M_pixel_0.dat',
                  sub_binning=0, **kwargs): #TODO not allow **kwargs (change in produce_data)
+
+        pulse_shape_file = resource_filename(
+            'digicamtoy', 'utils/pulse_SST-1M_pixel_0.dat'
+        )
 
         # np.random.seed(seed)
 
