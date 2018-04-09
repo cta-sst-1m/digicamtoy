@@ -1,11 +1,12 @@
 #!/usr/bin/env python
-from digicamtoy.tracegenerator import NTraceGenerator
+from datetime import datetime
 import h5py
 import numpy as np
 from tqdm import trange
-from datetime import datetime
 
 from commandr import command, Run, SetOptions
+
+from digicamtoy.tracegenerator import NTraceGenerator
 
 
 class ToyEventSink:
