@@ -34,6 +34,12 @@ class ToyEventSink:
     def __del__(self):
         self.hdf5.close()
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.hdf5.close()
+
 
 @command('main')
 def produce_data(
@@ -59,16 +65,16 @@ def produce_data(
     n_bins = (time_end - time_start) // time_sampling
     _locals = locals()
 
-    sink = ToyEventSink(
+    trace_generator = NTraceGenerator(**_locals)
+    with ToyEventSink(
         path=out_path,
         shape=(n_events, n_pixels, n_bins),
         meta=_locals
-    )
+    ) as sink:
 
-    trace_generator = NTraceGenerator(**_locals)
-    for count in trange(n_events):
-        next(trace_generator)
-        sink.add_event(index=count, data=trace_generator.adc_count)
+        for count in trange(n_events):
+            next(trace_generator)
+            sink.add_event(index=count, data=trace_generator.adc_count)
 
 if __name__ == '__main__':
     SetOptions(main='main')
