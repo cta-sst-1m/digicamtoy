@@ -76,6 +76,7 @@ def produce_data(
             next(trace_generator)
             sink.add_event(index=count, data=trace_generator.adc_count)
 
+
 if __name__ == '__main__':
     SetOptions(main='main')
     Run()
