@@ -8,6 +8,33 @@ import datetime
 from commandr import command, Run, SetOptions
 
 
+class ToyEventSink:
+
+    def __init__(self, path, shape, meta=None):
+        self.hdf5 = h5py.File(path, 'w')
+
+        self.dset = self.hdf5.create_dataset(
+            'adc_count',
+            dtype=np.uint16,
+            shape=shape,
+            chunks=(1, *shape[1:]),
+            compression='gzip',
+        )
+
+        if meta is not None:
+            self.add_meta(meta)
+        self.hdf5.attrs['date'] = str(datetime.datetime.now())
+
+    def add_meta(self, meta):
+        self.hdf5.attrs.update(meta)
+
+    def add_event(self, index, data):
+        self.dset[index] = data
+
+    def __del__(self):
+        self.hdf5.close()
+
+
 @command('main')
 def produce_data(
     out_path,
@@ -32,25 +59,16 @@ def produce_data(
     n_bins = (time_end - time_start) // time_sampling
     _locals = locals()
 
-    hdf5 = h5py.File(out_path, 'w')
-    hdf5.attrs.update(_locals)
-    hdf5.attrs['date'] = str(datetime.datetime.now())
-
-    adc_count = hdf5.create_dataset(
-        'adc_count',
-        dtype=np.uint16,
+    sink = ToyEventSink(
+        path=out_path,
         shape=(n_events, n_pixels, n_bins),
-        chunks=(1, n_pixels, n_bins),
-        compression='gzip',
+        meta=_locals
     )
 
     trace_generator = NTraceGenerator(**_locals)
     for count in trange(n_events):
         next(trace_generator)
-        adc_count[count] = trace_generator.adc_count
-
-    hdf5.close()
-
+        sink.add_event(index=count, data=trace_generator.adc_count)
 
 if __name__ == '__main__':
     SetOptions(main='main')
