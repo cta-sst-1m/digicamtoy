@@ -3,7 +3,7 @@ from digicamtoy.tracegenerator import NTraceGenerator
 import h5py
 import numpy as np
 from tqdm import trange
-import datetime
+from datetime import datetime
 
 from commandr import command, Run, SetOptions
 
@@ -23,7 +23,7 @@ class ToyEventSink:
 
         if meta is not None:
             self.add_meta(meta)
-        self.hdf5.attrs['date'] = str(datetime.datetime.now())
+        self.hdf5.attrs['date'] = datetime.utcnow().isoformat()
 
     def add_meta(self, meta):
         self.hdf5.attrs.update(meta)
