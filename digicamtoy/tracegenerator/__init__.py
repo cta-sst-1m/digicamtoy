@@ -42,8 +42,10 @@ class NTraceGenerator:
                  poisson=True, sigma_e=0.8, sigma_1=0.8, gain=5.8,
                  baseline=200, time_signal=20, jitter=0,
                  pulse_shape_file='/utils/pulse_SST-1M_pixel_0.dat',
-                 sub_binning=0, **kwargs): #TODO not allow **kwargs (change in produce_data)
-
+                 sub_binning=0,
+                 n_events=None,
+                 **kwargs  # TODO not allow **kwargs (change in produce_data)
+    ):
         # np.random.seed(seed)
 
         nsb_rate = np.atleast_1d(nsb_rate)
@@ -131,7 +133,8 @@ class NTraceGenerator:
                                        assume_sorted=True)
 
         self.sub_binning = sub_binning
-        self.count = -1
+        self.count = 0
+        self.n_events = n_events
         self.reset()
 
     def __str__(self):
@@ -166,6 +169,8 @@ class NTraceGenerator:
 
     def next(self):
 
+        if self.n_events is not None and self.count >= self.n_events:
+            raise StopIteration
         self.reset()
         self.count += 1
 
