@@ -134,7 +134,7 @@ class NTraceGenerator:
                                        assume_sorted=True)
 
         self.sub_binning = sub_binning
-        self.count = -1
+        self.count = 0
         self.n_events = n_events
         self.reset()
 
