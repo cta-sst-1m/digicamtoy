@@ -44,7 +44,7 @@ class NTraceGenerator:
                  pulse_shape_file='/utils/pulse_SST-1M_pixel_0.dat',
                  sub_binning=0,
                  n_events=None,
-                 **kwargs
+                 **kwargs  # TODO not allow **kwargs (change in produce_data)
     ):
         # np.random.seed(seed)
 
