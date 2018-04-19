@@ -1,9 +1,12 @@
 '''
 Execute: python <path_to_this_script.py>
 
-This creates a :
-It takes a while (many minutes) and will create a plot, you'd have to
-save manually to disk if you want to use it for a presentation or so.
+This creates a bunch of plots for different gains showing
+the std-deviation of the baseline versus the nsb rate.
+
+It takes a while to run (depending on nsb_rates and gains).
+It will create a plot, you'd have to save manually to disk
+if you want to use it for a presentation or so.
 
 '''
 from digicamtoy.tracegenerator import NTraceGenerator
@@ -16,9 +19,10 @@ plt.figure()
 
 N = 100
 nsb_rates = np.logspace(-0.5, 1.2, 10)
-results = []
+gains = np.linspace(3, 5, 5)
 
-for gain in tqdm(np.linspace(3, 5, 5)):
+results = []
+for gain in tqdm(gains):
     for nsb_rate in nsb_rates:
         toy = NTraceGenerator(
             pulse_shape_file='/utils/pulse_SST-1M_pixel_0.dat',
