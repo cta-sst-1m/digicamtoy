@@ -1,18 +1,25 @@
+'''
+Execute: python <path_to_this_script.py>
+
+This creates a :
+It takes a while (many minutes) and will create a plot, you'd have to
+save manually to disk if you want to use it for a presentation or so.
+
+'''
 from digicamtoy.tracegenerator import NTraceGenerator
 import matplotlib.pyplot as plt
 import numpy as np
+from tqdm import tqdm
+import pandas as pd
 
 plt.figure()
 
-N = 3000
-nsb_rates = np.logspace(-0.5, 1.2, 30)
-for gain in np.linspace(3, 5, 5):
-    means = []
-    stds = []
-    gains = []
+N = 100
+nsb_rates = np.logspace(-0.5, 1.2, 10)
+results = []
 
+for gain in tqdm(np.linspace(3, 5, 5)):
     for nsb_rate in nsb_rates:
-        print(nsb_rate)
         toy = NTraceGenerator(
             pulse_shape_file='/utils/pulse_SST-1M_pixel_0.dat',
             n_pixels=1,
@@ -20,25 +27,29 @@ for gain in np.linspace(3, 5, 5):
             nsb_rate=nsb_rate,
             gain=gain,
             baseline=10,
+            n_events=N,
         )
-        gains.append(toy.gain[0])
-        M = []
-        S = []
-        for i, event in enumerate(toy):
-            if i > N:
-                break
-            M.append(event.adc_count[0].mean())
-            S.append(event.adc_count[0].std())
-        means.append(M)
-        stds.append(S)
+        baseline_std_deviation = np.array([
+            event.adc_count[0].std()
+            for event in toy
+        ])
 
-    means = np.array(means)
-    stds = np.array(stds)
+        results.append({
+            'gain': gain,
+            'nsb_rate': nsb_rate,
+            'baseline_std_deviation_mean':
+                baseline_std_deviation.mean(),
+            'baseline_std_deviation_sde_of_mean':
+                baseline_std_deviation.std() / np.sqrt(N),
+        })
 
+results = pd.DataFrame(results)
+
+for gain, sub_results in results.groupby('gain'):
     plt.errorbar(
-        x=nsb_rates,
-        y=stds.mean(axis=1),
-        yerr=stds.std(axis=1) / np.sqrt(N),
+        x=sub_results.nsb_rate,
+        y=sub_results.baseline_std_deviation_mean,
+        yerr=sub_results.baseline_std_deviation_sde_of_mean,
         fmt='.:',
         label='gain: {}'.format(gain),
     )
