@@ -46,7 +46,6 @@ class NTraceGenerator:
                  n_events=None,
                  **kwargs
     ):
-
         # np.random.seed(seed)
 
         nsb_rate = np.atleast_1d(nsb_rate)
@@ -104,7 +103,7 @@ class NTraceGenerator:
         self.jitter = jitter
         self.poisson = poisson
         directory = os.path.dirname(digicamtoy.__file__)
-        self.filename_pulse_shape = directory + pulse_shape_file
+        self.filename_pulse_shape = os.path.join(directory, pulse_shape_file)
         self.gain = gain
         self.sigma_e = sigma_e
         self.gain_nsb = gain_nsb

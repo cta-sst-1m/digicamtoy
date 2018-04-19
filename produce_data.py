@@ -1,6 +1,7 @@
 import os
 from optparse import OptionParser
 import yaml
+from yaml import CLoader
 from digicamtoy.tracegenerator import NTraceGenerator
 import h5py
 import numpy as np
@@ -37,7 +38,7 @@ if __name__ == '__main__':
 
     with open(options.yaml_config) as stream:
 
-        options_yaml.update(yaml.load(stream))
+        options_yaml.update(yaml.load(stream, Loader=CLoader))
 
     for key, val in options_yaml.items():
 
@@ -63,7 +64,7 @@ if __name__ == '__main__':
     n_bins = n_bins // options_generator.time_sampling
     events_per_level = options_generator.events_per_level
 
-    data_shape = (n_pixels, n_bins, events_per_level)
+    data_shape = (events_per_level, n_pixels, n_bins)
 
     for nsb_rate in tqdm(options.nsb_rate,
                          leave=True,
@@ -100,9 +101,10 @@ if __name__ == '__main__':
 
             adc_count = np.zeros(data_shape, dtype=np.uint16)
 
-            cherenkov_array_shape = (n_pixels,
+            cherenkov_array_shape = (events_per_level,
+                                     n_pixels,
                                      n_photon.shape[-1],
-                                     events_per_level)
+                                     )
 
             cherenkov_time = np.zeros(cherenkov_array_shape)
             cherenkov_photon = np.zeros(cherenkov_array_shape)
@@ -112,19 +114,22 @@ if __name__ == '__main__':
                     leave=False, desc='waveform'),
                     NTraceGenerator(**vars(options_generator))):
 
-                adc_count[..., count] = trace_generator.adc_count
-                cherenkov_time[..., count] = trace_generator.cherenkov_time
-                cherenkov_photon[..., count] = trace_generator.cherenkov_photon
+                adc_count[count] = trace_generator.adc_count
+                cherenkov_time[count] = trace_generator.cherenkov_time
+                cherenkov_photon[count] = trace_generator.cherenkov_photon
 
             log.info('\t\t-|> Saving data to {}'.format(filename))
             data.create_dataset('adc_count', data=adc_count,
                                 dtype=np.uint16,
+                                chunks=True,
                                 compression="gzip")
             data.create_dataset('time',
                                 data=cherenkov_time,
+                                chunks=True,
                                 compression="gzip")
             data.create_dataset('charge',
                                 data=cherenkov_photon,
+                                chunks=True,
                                 compression="gzip")
             config.create_dataset('date',
                                   data=str(datetime.datetime.now()))

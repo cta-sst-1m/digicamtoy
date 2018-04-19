@@ -1,0 +1,15 @@
+name: digicamtoy
+channels:
+- defaults
+- prometeia
+dependencies:
+- python=3.5.4
+- docopt=0.6.2
+- h5py=2.7.1
+- matplotlib=2.1.0
+- numpy=1.13.3
+- pandas
+- pyyaml
+- scipy
+- tqdm
+- humanize
