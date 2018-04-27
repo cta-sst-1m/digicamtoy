@@ -40,7 +40,7 @@ if __name__ == '__main__':
 
     params = dict()
     params['output_directory'] = '/sst1m/MC/digicamtoy/'
-    params['events_per_level'] = 100
+    params['events_per_level'] = 1000
 
     add_standard_camera_parameters(params)
     add_standard_sipm_parameters(params)
@@ -49,16 +49,21 @@ if __name__ == '__main__':
     config_file_path = 'commissioning/ac_{}_dc_{}_id_{}.yml'
 
     nsb_rates = np.linspace(0.003, 2, num=30)
-    n_photons = np.linspace(0, 2000, num=30)
+    n_photons = np.arange(0, 500, 1)
+
+    n_files_per_level = 10
 
     for i, n_photon in tqdm(enumerate(n_photons), total=len(n_photons)):
 
         for j, nsb_rate in tqdm(enumerate(nsb_rates), total=len(nsb_rates),
                                 leave=False):
 
-            for k in tqdm(range(1000), leave=False):
+            if j > 0:
+                continue
 
-                add_light_parameters(params, nsb_rate, n_photon=0)
+            for k in tqdm(range(n_files_per_level), leave=False):
+
+                add_light_parameters(params, nsb_rate, n_photon)
                 params['file_basename'] = output_file_name.format(i, j, k)
 
                 with open(config_file_path.format(i, j, k), mode='w') as file:

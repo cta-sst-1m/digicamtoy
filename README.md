@@ -34,3 +34,13 @@ your prompt should look similar to this this:
 Finally change into the digicampipe directory.
 
     cd digicampipe
+
+# Run digicamtoy
+
+To produce a set of data you have to create a config file (yaml). Have a look
+in this project for some example of config files. Then run the following script
+like this:
+
+`
+python produce_date.py -y <config_file.yml>
+`
