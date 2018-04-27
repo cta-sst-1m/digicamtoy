@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --cpus-per-task=1
 #SBATCH --ntasks=1
-#SBATCH --time=0-12:00:00
+#SBATCH --time=0-2:00:00
 #SBATCH --partition=mono
 #SBATCH --output=/home/alispach/output/slurm-%A.out
 #SBATCH --error=/home/alispach/output/slurm-%A.err
