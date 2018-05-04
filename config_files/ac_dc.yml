@@ -17,4 +17,4 @@ gain : 5.8
 baseline : 200
 time_signal : 20
 jitter : 0.3
-pulse_shape_file : /utils/pulse_SST-1M_pixel_0.dat
+pulse_shape_file : digicamtoy/utils/pulse_SST-1M_pixel_0.dat
