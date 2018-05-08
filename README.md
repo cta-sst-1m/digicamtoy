@@ -29,11 +29,11 @@ your prompt should look similar to this this:
 
     (digicamtoy) username@host:~/ctasoft$
 
-    pip install -e digicampipe
+    pip install -e digicamtoy
 
 Finally change into the digicampipe directory.
 
-    cd digicampipe
+    cd digicamtoy
 
 # Run digicamtoy
 
