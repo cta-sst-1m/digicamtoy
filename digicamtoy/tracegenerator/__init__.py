@@ -217,10 +217,9 @@ class NTraceGenerator:
 
         else:
 
-            sub_bins = np.arange(self.time_start, self.time_end,
-                                 self.sub_binning)
-            hist = np.random.randint(0, sub_bins.shape[-1],
-                                     size=(self.n_pixels, max_photon))
+            self.nsb_time = np.tile(self.sampling_bins, (self.n_pixels, 1))
+            self.nsb_photon = np.random.poisson(lam=self.nsb_rate *
+                                                    self.time_sampling)
 
         self.mask = np.arange(max_photon)
         self.mask = np.tile(self.mask, (self.n_pixels, 1))
@@ -264,12 +263,22 @@ class NTraceGenerator:
 
             for i in range(self.nsb_photon.shape[-1]):
 
-                nsb_crosstalk[pixel, i] = self._poisson_crosstalk(
-                    self.crosstalk[pixel])
+                if self.sub_binning > 0:
+
+                    for _ in range(self.nsb_photon[pixel, i]):
+
+                        nsb_crosstalk[pixel, i] += self._poisson_crosstalk(
+                            self.crosstalk[pixel]
+                        )
+
+                else:
+
+                    nsb_crosstalk[pixel, i] = self._poisson_crosstalk(
+                        self.crosstalk[pixel])
 
             for j in range(self.cherenkov_photon.shape[-1]):
 
-                for k in range(self.cherenkov_photon[pixel, j]):
+                for _ in range(self.cherenkov_photon[pixel, j]):
 
                     cherenkov_crosstalk[pixel, j] += self._poisson_crosstalk(
                         self.crosstalk[pixel])

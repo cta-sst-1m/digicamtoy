@@ -47,7 +47,9 @@ if __name__ == '__main__':
     for i in range(len(options.n_photon)*len(options.nsb_rate)):
 
         existing_file = False
-        filename = options.output_directory + options.file_basename.format(i)
+        filename = os.path.join(options.output_directory,
+                                options.file_basename.format(i))
+        # filename = options.output_directory + options.file_basename.format(i)
         if os.path.exists(filename):
             existing_file = True
             log.error('File {} already exists'.format(filename))
@@ -87,8 +89,8 @@ if __name__ == '__main__':
             else:
                 n_photon = pd.DataFrame(n_photon).fillna(0).values
 
-            filename = options.output_directory
-            filename += options.file_basename.format(file_number)
+            filename = os.path.join(options.output_directory,
+                                    options.file_basename.format(file_number))
 
             hdf5 = h5py.File(filename, 'w')
             config = hdf5.create_group('config')
