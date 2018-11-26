@@ -229,7 +229,7 @@ class NTraceGenerator:
         jitter = copy.copy(self.jitter)
         mask = jitter <= 0
         jitter[mask] = 1
-        jitter = np.random.uniform(0, jitter)
+        jitter = np.random.uniform(-jitter/2, jitter/2)
         jitter[mask] = 0
         self.cherenkov_time = self.time_signal + jitter
         self.cherenkov_photon = np.random.poisson(lam=self.n_photon) if \
