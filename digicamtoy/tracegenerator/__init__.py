@@ -106,6 +106,7 @@ class NTraceGenerator:
         self.sigma_e = sigma_e
         self.gain_nsb = gain_nsb
         self.voltage_drop = voltage_drop
+        self.sigma_1 = sigma_1 / self.gain
 
         if voltage_drop:
 
@@ -136,7 +137,6 @@ class NTraceGenerator:
               ''.format(gain.mean(), self.gain.mean()))
 
         self.baseline = baseline
-        self.sigma_1 = sigma_1 / self.gain
 
         time_steps, amplitudes = np.loadtxt(self.filename_pulse_shape,
                                             unpack=True)
