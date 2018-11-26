@@ -155,8 +155,8 @@ class NTraceGenerator:
                                        bounds_error=False, fill_value=0.,
                                        assume_sorted=True)
 
-        self.true_baseline = self.baseline + self.gain * self.nsb_rate * \
-                             (1 / (1 - self.crosstalk)) * self.tau
+        self.true_baseline = self.baseline + self.gain * self.nsb_rate * (
+                1 / (1 - self.crosstalk)) * self.tau
 
         print('True Baseline : {} [LSB]'.format(self.true_baseline.mean()))
 
