@@ -47,7 +47,9 @@ if __name__ == '__main__':
     for i in range(len(options.n_photon)*len(options.nsb_rate)):
 
         existing_file = False
-        filename = options.output_directory + options.file_basename.format(i)
+        filename = os.path.join(options.output_directory,
+                                options.file_basename.format(i))
+        # filename = options.output_directory + options.file_basename.format(i)
         if os.path.exists(filename):
             existing_file = True
             log.error('File {} already exists'.format(filename))
@@ -87,8 +89,8 @@ if __name__ == '__main__':
             else:
                 n_photon = pd.DataFrame(n_photon).fillna(0).values
 
-            filename = options.output_directory
-            filename += options.file_basename.format(file_number)
+            filename = os.path.join(options.output_directory,
+                                    options.file_basename.format(file_number))
 
             hdf5 = h5py.File(filename, 'w')
             config = hdf5.create_group('config')
@@ -108,15 +110,20 @@ if __name__ == '__main__':
 
             cherenkov_time = np.zeros(cherenkov_array_shape)
             cherenkov_photon = np.zeros(cherenkov_array_shape)
+            trace_generator = NTraceGenerator(**vars(options_generator))
 
-            for count, trace_generator in zip(tqdm(
+            data.create_dataset('true_baseline',
+                                data=trace_generator.true_baseline,
+                                compression="gzip")
+
+            for count, trace in zip(tqdm(
                     range(options.events_per_level),
                     leave=False, desc='waveform'),
-                    NTraceGenerator(**vars(options_generator))):
+                    trace_generator):
 
-                adc_count[count] = trace_generator.adc_count
-                cherenkov_time[count] = trace_generator.cherenkov_time
-                cherenkov_photon[count] = trace_generator.cherenkov_photon
+                adc_count[count] = trace.adc_count
+                cherenkov_time[count] = trace.cherenkov_time
+                cherenkov_photon[count] = trace.cherenkov_photon
 
             log.info('\t\t-|> Saving data to {}'.format(filename))
             data.create_dataset('adc_count', data=adc_count,

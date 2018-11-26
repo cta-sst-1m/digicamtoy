@@ -9,7 +9,7 @@ n_pixels : 1296
 nsb_rate : [0.003]
 crosstalk : 0.08
 gain_nsb : True
-n_photon : [0.]
+n_photon : [0., 1, 2, 3]
 poisson : True
 sigma_e : 0.8
 sigma_1 : 0.8

@@ -1,4 +1,4 @@
-output_directory : /home/alispach/
+output_directory : /home/alispach/ctasoft/digicampipe/digicampipe/tests/
 file_basename : test_digicamtoy_{}.hdf5
 events_per_level : 10
 
@@ -6,15 +6,15 @@ time_start : 0
 time_end : 200
 time_sampling : 4
 n_pixels : 1296
-nsb_rate : [0.003, 0.3 , 0.5]
+nsb_rate : [0, 0.003, 0.04, 0.125, 0.66, 1]
 crosstalk : 0.08
 gain_nsb : True
 n_photon : [0., 1., 10., 100]
 poisson : True
-sigma_e : 0.8
+sigma_e : 1.25
 sigma_1 : 0.8
-gain : 5.8
-baseline : 200
+gain : 5
+baseline : 280
 time_signal : 20
-jitter : 0.3
-pulse_shape_file : digicamtoy/utils/pulse_SST-1M_pixel_0.dat
+jitter : 0.2
+pulse_shape_file : utils/pulse_SST-1M_pixel_0.dat
