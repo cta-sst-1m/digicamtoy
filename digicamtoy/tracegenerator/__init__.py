@@ -190,8 +190,8 @@ class NTraceGenerator:
 
         self.cherenkov_time = np.zeros(self.n_photon.shape)
         self.cherenkov_photon = np.zeros(self.n_photon.shape, dtype=np.int)
-        self.nsb_time = np.zeros((self.n_pixels, 1))
         self.nsb_photon = np.zeros((self.n_pixels, 1))
+        self.nsb_time = np.zeros((self.n_pixels, 1))
         self.mask = np.zeros(self.nsb_photon.shape)
         self.sampling_bins = np.arange(self.time_start, self.time_end,
                                        self.time_sampling)
@@ -257,12 +257,13 @@ class NTraceGenerator:
 
         else:
 
-            if self.count == 0:
+            # if self.count == 0:
 
-                self.nsb_time = np.tile(self.sampling_bins, (self.n_pixels, 1))
-
-            self.nsb_photon = np.random.poisson(lam=self.nsb_rate *
-                                                    self.time_sampling)
+            self.nsb_time = np.tile(self.sampling_bins, (self.n_pixels, 1))
+            n_nsb = self.nsb_rate * self.time_sampling
+            n_nsb = np.tile(n_nsb, (len(self.sampling_bins), 1)).T
+            self.nsb_photon = np.random.poisson(lam=n_nsb)
+            self.mask = self.nsb_photon > 0
 
     def _poisson_crosstalk(self, crosstalk):
 
@@ -347,13 +348,10 @@ class NTraceGenerator:
 
     def compute_analog_signal(self):
 
-        if self.sub_binning <=0:
-            times = self.sampling_bins - self.nsb_time[..., np.newaxis]
-            self.adc_count = self.get_pulse_shape(times) * \
-                             (self.nsb_photon * self.mask)[..., np.newaxis]
-        else:
-            times = self.sampling_bins - self.nsb_time[:, np.newaxis]
-            self.adc_count = self.get_pulse_shape(times) * self.nsb_photon[..., np.newaxis]
+        times = self.sampling_bins - self.nsb_time[..., np.newaxis]
+        self.adc_count = self.get_pulse_shape(times) * \
+                         (self.nsb_photon * self.mask)[..., np.newaxis]
+
         self.adc_count = np.sum(self.adc_count, axis=1)
         times = self.sampling_bins - self.cherenkov_time[..., np.newaxis]
         temp = self.get_pulse_shape(times) * \
