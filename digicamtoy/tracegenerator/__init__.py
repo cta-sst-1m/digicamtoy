@@ -117,11 +117,7 @@ class NTraceGenerator:
             self.n_photon = self.n_photon * true_pde_drop(nsb_rate * 1E9)
 
         elif gain_nsb:
-            self.cell_capacitance = 85. * 1E-15
-            self.bias_resistance = 10. * 1E3
-            self.gain = gain / (1. + nsb_rate * self.cell_capacitance
-                                * self.bias_resistance * 1E9
-                                * self.gain_nsb)
+            self.gain = gain / (1. + nsb_rate / self.gain_nsb)
             self.crosstalk = crosstalk
             self.nsb_rate = nsb_rate
 
