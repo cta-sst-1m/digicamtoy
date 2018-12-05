@@ -156,7 +156,12 @@ class NTraceGenerator:
         self.true_baseline = self.baseline + self.gain * self.nsb_rate * (
                 1 / (1 - self.crosstalk)) * self.tau
 
-        print('True Baseline : {} [LSB]'.format(self.true_baseline.mean()))
+        print('Set Baseline : {} [LSB]'
+              '\tTrue Baseline : {} [LSB]'
+              '\tTrue Baseline Shift : {} [LSB]'
+              ''.format(self.baseline.mean(),
+                        self.true_baseline.mean()),
+              self.true_baseline.mean() - self.baseline.mean())
 
         self.sub_binning = sub_binning
         self.count = -1
