@@ -117,11 +117,7 @@ class NTraceGenerator:
             self.n_photon = self.n_photon * true_pde_drop(nsb_rate * 1E9)
 
         elif gain_nsb:
-            self.cell_capacitance = 85. * 1E-15
-            self.bias_resistance = 10. * 1E3
-            self.gain = gain / (1. + nsb_rate * self.cell_capacitance
-                                * self.bias_resistance * 1E9
-                                * self.gain_nsb)
+            self.gain = gain / (1. + nsb_rate / self.gain_nsb)
             self.crosstalk = crosstalk
             self.nsb_rate = nsb_rate
 
@@ -160,7 +156,12 @@ class NTraceGenerator:
         self.true_baseline = self.baseline + self.gain * self.nsb_rate * (
                 1 / (1 - self.crosstalk)) * self.tau
 
-        print('True Baseline : {} [LSB]'.format(self.true_baseline.mean()))
+        print('Set Baseline : {} [LSB]'
+              '\tTrue Baseline : {} [LSB]'
+              '\tTrue Baseline Shift : {} [LSB]'
+              ''.format(self.baseline.mean(),
+                        self.true_baseline.mean()),
+              self.true_baseline.mean() - self.baseline.mean())
 
         self.sub_binning = sub_binning
         self.count = -1
@@ -190,8 +191,8 @@ class NTraceGenerator:
 
         self.cherenkov_time = np.zeros(self.n_photon.shape)
         self.cherenkov_photon = np.zeros(self.n_photon.shape, dtype=np.int)
-        self.nsb_time = np.zeros((self.n_pixels, 1))
         self.nsb_photon = np.zeros((self.n_pixels, 1))
+        self.nsb_time = np.zeros((self.n_pixels, 1))
         self.mask = np.zeros(self.nsb_photon.shape)
         self.sampling_bins = np.arange(self.time_start, self.time_end,
                                        self.time_sampling)
@@ -257,12 +258,13 @@ class NTraceGenerator:
 
         else:
 
-            if self.count == 0:
+            # if self.count == 0:
 
-                self.nsb_time = np.tile(self.sampling_bins, (self.n_pixels, 1))
-
-            self.nsb_photon = np.random.poisson(lam=self.nsb_rate *
-                                                    self.time_sampling)
+            self.nsb_time = np.tile(self.sampling_bins, (self.n_pixels, 1))
+            n_nsb = self.nsb_rate * self.time_sampling
+            n_nsb = np.tile(n_nsb, (len(self.sampling_bins), 1)).T
+            self.nsb_photon = np.random.poisson(lam=n_nsb)
+            self.mask = self.nsb_photon > 0
 
     def _poisson_crosstalk(self, crosstalk):
 
@@ -347,13 +349,10 @@ class NTraceGenerator:
 
     def compute_analog_signal(self):
 
-        if self.sub_binning <=0:
-            times = self.sampling_bins - self.nsb_time[..., np.newaxis]
-            self.adc_count = self.get_pulse_shape(times) * \
-                             (self.nsb_photon * self.mask)[..., np.newaxis]
-        else:
-            times = self.sampling_bins - self.nsb_time[:, np.newaxis]
-            self.adc_count = self.get_pulse_shape(times) * self.nsb_photon[..., np.newaxis]
+        times = self.sampling_bins - self.nsb_time[..., np.newaxis]
+        self.adc_count = self.get_pulse_shape(times) * \
+                         (self.nsb_photon * self.mask)[..., np.newaxis]
+
         self.adc_count = np.sum(self.adc_count, axis=1)
         times = self.sampling_bins - self.cherenkov_time[..., np.newaxis]
         temp = self.get_pulse_shape(times) * \
