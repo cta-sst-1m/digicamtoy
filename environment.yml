@@ -4,6 +4,7 @@ channels:
 - prometeia
 - anaconda
 dependencies:
+- astropy
 - python=3.5.4
 - docopt=0.6.2
 - h5py=2.7.1
