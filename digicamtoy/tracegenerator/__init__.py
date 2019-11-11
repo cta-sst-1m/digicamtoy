@@ -34,7 +34,6 @@ def _generalized_poisson_crosstalk(crosstalk, n_photon):
     return counter
 """
 
-
 class NTraceGenerator:
 
     def __init__(self,
@@ -160,8 +159,8 @@ class NTraceGenerator:
               '\tTrue Baseline : {} [LSB]'
               '\tTrue Baseline Shift : {} [LSB]'
               ''.format(self.baseline.mean(),
-                        self.true_baseline.mean()),
-              self.true_baseline.mean() - self.baseline.mean())
+                        self.true_baseline.mean(),
+                        self.true_baseline.mean() - self.baseline.mean()))
 
         self.sub_binning = sub_binning
         self.count = -1
@@ -234,7 +233,7 @@ class NTraceGenerator:
         jitter[mask] = 0
         self.cherenkov_time = self.time_signal + jitter
         self.cherenkov_photon = np.random.poisson(lam=self.n_photon) if \
-            self.poisson else self.n_photon
+            self.poisson else self.n_photon.astype(np.int)
         self.cherenkov_photon[self.n_photon <= 0] = 0
 
     def generate_nsb(self):
@@ -380,6 +379,41 @@ class NTraceGenerator:
         self.adc_count = self.adc_count.round()
         self.adc_count = self.adc_count.astype(np.uint)
 
+
+class ShowerGenerator(NTraceGenerator):
+
+    def __init__(self, **kwargs):
+
+        super(ShowerGenerator, self).__init__(**kwargs)
+
+    def set_photoelectrons(self, time_signal, n_photon, jitter=0.):
+
+        n_pixels = self.n_pixels
+
+        if isinstance(n_photon, int) or isinstance(n_photon, float):
+
+            n_photon = [[n_photon]] * n_pixels
+            n_photon = np.atleast_2d(n_photon)
+
+        else:
+            n_photon = pd.DataFrame(n_photon).fillna(0).values
+
+        if isinstance(time_signal, int) or isinstance(time_signal, float):
+            time_signal = [[time_signal]] * n_pixels
+            time_signal = np.atleast_2d(time_signal)
+
+        else:
+            time_signal = pd.DataFrame(time_signal).fillna(0).values
+
+        if isinstance(jitter, int) or isinstance(jitter, float):
+            jitter = [[jitter]] * n_pixels
+            jitter = np.atleast_2d(jitter)
+        else:
+            jitter = pd.DataFrame(jitter).fillna(0).values
+
+        self.n_photon = n_photon
+        self.time_signal = time_signal
+        self.jitter = jitter
 
 '''
 class TraceGenerator:
