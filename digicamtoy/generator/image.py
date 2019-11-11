@@ -1,4 +1,6 @@
-from digicamtoy.generator import NTraceGenerator
+from digicamtoy.generator.trace import NTraceGenerator
+import numpy as np
+import astropy.units as u
 
 
 class EllipseGenerator(NTraceGenerator):
