@@ -1,4 +1,4 @@
-from digicamtoy.tracegenerator import NTraceGenerator
+from digicamtoy.generator.trace import NTraceGenerator
 
 
 def test_n_events():

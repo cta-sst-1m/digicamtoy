@@ -2,7 +2,7 @@ import os
 from optparse import OptionParser
 import yaml
 from yaml import CLoader
-from digicamtoy.tracegenerator import NTraceGenerator
+from digicamtoy.generator.trace import NTraceGenerator
 import h5py
 import numpy as np
 import copy

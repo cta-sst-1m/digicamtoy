@@ -9,7 +9,7 @@ It will create a plot, you'd have to save manually to disk
 if you want to use it for a presentation or so.
 
 '''
-from digicamtoy.tracegenerator import NTraceGenerator
+from digicamtoy.generator.trace import NTraceGenerator
 import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
