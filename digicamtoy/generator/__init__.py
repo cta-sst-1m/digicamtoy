@@ -1,5 +1,7 @@
 import os.path
 from scipy.interpolate import interp1d
+from scipy import linalg
+from scipy.stats import multivariate_normal
 import copy
 import pandas as pd
 import numpy as np
@@ -379,41 +381,6 @@ class NTraceGenerator:
         self.adc_count = self.adc_count.round()
         self.adc_count = self.adc_count.astype(np.uint)
 
-
-class ShowerGenerator(NTraceGenerator):
-
-    def __init__(self, **kwargs):
-
-        super(ShowerGenerator, self).__init__(**kwargs)
-
-    def set_photoelectrons(self, time_signal, n_photon, jitter=0.):
-
-        n_pixels = self.n_pixels
-
-        if isinstance(n_photon, int) or isinstance(n_photon, float):
-
-            n_photon = [[n_photon]] * n_pixels
-            n_photon = np.atleast_2d(n_photon)
-
-        else:
-            n_photon = pd.DataFrame(n_photon).fillna(0).values
-
-        if isinstance(time_signal, int) or isinstance(time_signal, float):
-            time_signal = [[time_signal]] * n_pixels
-            time_signal = np.atleast_2d(time_signal)
-
-        else:
-            time_signal = pd.DataFrame(time_signal).fillna(0).values
-
-        if isinstance(jitter, int) or isinstance(jitter, float):
-            jitter = [[jitter]] * n_pixels
-            jitter = np.atleast_2d(jitter)
-        else:
-            jitter = pd.DataFrame(jitter).fillna(0).values
-
-        self.n_photon = n_photon
-        self.time_signal = time_signal
-        self.jitter = jitter
 
 '''
 class TraceGenerator:
