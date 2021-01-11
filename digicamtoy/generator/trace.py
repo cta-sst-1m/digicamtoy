@@ -25,6 +25,7 @@ class NTraceGenerator:
                  pulse_shape_file='/utils/pulse_SST-1M_pixel_0.dat',
                  sub_binning=0,
                  n_events=None, voltage_drop=False,
+                 verbose=True,
                  **kwargs  # TODO not allow **kwargs (change in produce_data)
     ):
         # np.random.seed(seed)
@@ -107,12 +108,14 @@ class NTraceGenerator:
             self.nsb_rate = nsb_rate
             self.crosstalk = crosstalk
 
-        print('Set NSB rate : {} [GHz] \tTrue NSB rate : {} [GHz]'
-              ''.format(nsb_rate.mean(), self.nsb_rate.mean()))
-        print('Set XT : {} [p.e.] \tTrue XT : {} [p.e.]'
-              ''.format(crosstalk.mean(), self.crosstalk.mean()))
-        print('Set Gain : {} [LSB/p.e.] \tTrue Gain : {} [LSB/p.e.]'
-              ''.format(gain.mean(), self.gain.mean()))
+        if verbose:
+
+            print('Set NSB rate : {} [GHz] \tTrue NSB rate : {} [GHz]'
+                  ''.format(nsb_rate.mean(), self.nsb_rate.mean()))
+            print('Set XT : {} [p.e.] \tTrue XT : {} [p.e.]'
+                  ''.format(crosstalk.mean(), self.crosstalk.mean()))
+            print('Set Gain : {} [LSB/p.e.] \tTrue Gain : {} [LSB/p.e.]'
+                  ''.format(gain.mean(), self.gain.mean()))
         self.sigma_1 = sigma_1 / self.gain
         self.baseline = baseline
 
@@ -136,12 +139,13 @@ class NTraceGenerator:
         self.true_baseline = self.baseline + self.gain * self.nsb_rate * (
                 1 / (1 - self.crosstalk)) * self.tau
 
-        print('Set Baseline : {} [LSB]'
-              '\tTrue Baseline : {} [LSB]'
-              '\tTrue Baseline Shift : {} [LSB]'
-              ''.format(self.baseline.mean(),
-                        self.true_baseline.mean(),
-                        self.true_baseline.mean() - self.baseline.mean()))
+        if verbose:
+            print('Set Baseline : {} [LSB]'
+                  '\tTrue Baseline : {} [LSB]'
+                  '\tTrue Baseline Shift : {} [LSB]'
+                  ''.format(self.baseline.mean(),
+                            self.true_baseline.mean(),
+                            self.true_baseline.mean() - self.baseline.mean()))
 
         self.sub_binning = sub_binning
         self.count = -1
